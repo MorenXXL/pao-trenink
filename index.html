@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>PAO Trénink</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        h1 { color: white; text-align: center; margin-bottom: 30px; font-size: 2.5em; }
+        h2 { color: white; text-align: center; margin-bottom: 20px; font-size: 1.8em; }
+        .card { 
+            background: white; 
+            border-radius: 15px; 
+            padding: 25px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .card:hover { transform: translateY(-5px); }
+        .card h3 { color: #667eea; margin-bottom: 10px; font-size: 1.5em; }
+        .card p { color: #666; }
+        .btn { 
+            background: #667eea; 
+            color: white; 
+            border: none; 
+            padding: 15px 30px; 
+            border-radius: 10px; 
+            font-size: 1.2em; 
+            cursor: pointer; 
+            width: 100%;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .btn:hover { background: #5568d3; }
+        .btn-success { background: #10b981; }
+        .btn-danger { background: #ef4444; }
+        .btn-secondary { background: #6b7280; }
+        .question { 
+            font-size: 3em; 
+            font-weight: bold; 
+            text-align: center; 
+            color: #667eea; 
+            margin: 40px 0;
+        }
+        .answer { 
+            font-size: 2em; 
+            text-align: center; 
+            color: #10b981; 
+            background: #f0fdf4; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin-bottom: 20px;
+        }
+        .stats { 
+            display: flex; 
+            justify-content: space-around; 
+            color: white; 
+            font-size: 1.2em; 
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .edit-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            border: none;
+            cursor: pointer;
+        }
+        .edit-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .edit-item:hover { background: #f9fafb; }
+        .edit-number { 
+            font-weight: bold; 
+            color: #667eea; 
+            min-width: 50px;
+        }
+        .edit-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        .small-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .back-btn {
+            color: white;
+            background: none;
+            border: none;
+            font-size: 1.2em;
+            cursor: pointer;
+            margin-bottom: 20px;
+            padding: 10px;
+        }
+        .relative { position: relative; }
+        .scroll-container {
+            max-height: 60vh;
+            overflow-y: auto;
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app"></div>
+
+    <script>
+        const DEFAULT_VELKY = {0:"Kryton na tácu roznáší pití",1:"Superman letí v pláštěnce",2:"Batman startuje Batmobil",3:"Spiderman vystřeluje z ruky síť",4:"Thor točí kladivem",5:"Hulk ničí tank",6:"Optimus Prime se mění v auto",7:"James Bond nasazuje (na pistoli) tlumič",8:"Vojta si hraje playstation",9:"Woody si nasazuje klobouk",10:"Jack Sparrow se plaví na moři",11:"Tarzan se houpe na liáně",12:"Viki staví mrakodrap",13:"Harry Potter kouzlí kouzelnickou hůlkou",14:"Hermiona míchá v kotlíku lektvar",15:"David Cooprofield nechává zmizet socha svobody",16:"Leonardo da Vinci maluje na zeď poslední večeře (obraz)",17:"Michelangelo sochá sochu Davida",18:"Ninja hází (jako hvězdici) hvězdici",19:"Dartaňan bodá kordem",20:"Rocky Balboa boxuje v rukavicích",21:"Rambo střílí lukem",22:"Terminator si řeže oko",23:"Schwarzenegger posiluje činkami",24:"Mr. Bean natírá pokoj barvou",25:"Monika umývá nádobí",26:"Ross Geller oprašuje kostru štětečkem",27:"Čendler kouří cigaretu",28:"Rachel si kupuje oblečení",29:"Joye se nedělí o své jídlo",30:"Phoebe - Fíbí masíruje na lehátku",31:"Bárt jede (jako na skejtu) na skejtu",32:"Megí dudlá dudlík",33:"Líza se učí ze sešitu",34:"Homer Simpson pije z půllitru pivo",35:"Godzila boří (ve velkém) Tokio",36:"King Kong šplhá na budovu budovu",37:"Žokej vede za uzdu koně",38:"Ronaldo kope (do míče) do míče",39:"Dominik Hašek chytá v bráně puk",40:"Hitler nechává vyvraždit židy",41:"Drákula saje z krku krev",42:"Počítač lidstva počítá číslo",43:"Pepek námořník jí lžící špenát",44:"Indiana Jones bičuje bičem",45:"Voják zdvihá prapor",46:"Samuraj páchá harakiri katanou",47:"zlatokop dolujicí zlaté valouny",48:"Cimrman vynalézá dynamit",49:"Tomáš Baťa šije boty",50:"Táta spí v křesle",51:"Žeryk ohryzává kost",52:"Santa Klaus dává pod stromeček dárky",53:"Máma nese v rukách talíř se řízkem a brambory",54:"Babička peče cukroví",55:"Sherlock Holmes hraje smyčcem na housle",56:"Robocop zatýká (zločince) do vězení",57:"Voskovec a Werich zkoumají granát",58:"Jackie Chan padá do markýzy",59:"Travolta si češe vlasy",60:"Frodo si na prst nasazuje prsten",61:"Belmondo řídí kabriolet",62:"Angelika leží v posteli",63:"Švejk krade psa",64:"Baloun žere štrůdl",65:"Lara Croft skáče na skálu",66:"Yoda zapíná světelný meč",67:"čert chřestí řetězy",68:"Jaromír Jágr dává gól hokejkou",69:"Striptérka tancuje u tyče",70:"Zoro vyřezává kordem písmeno 'Z'",71:"Rejža natáčí (kamerou) kamerou",72:"Stříhoruký Eduard stříhá nůžkami",73:"Bomberman odpaljuje bombu",74:"Strašidlo straší na hradě",75:"Karel pracuje na počítačem",76:"Hřebajz hrozí trojzubcem",77:"brácha listuje Foglarovkou",78:"Ježíšek se usmívá v kolébce",79:"Alice čte knížku",80:"Michael Jackson jde měsíční chůzí po měsíci",81:"Zvoník zvoní na zvon",82:"Klaun žongluje kuželkami",83:"Řezník řeže maso",84:"Dřevorubec kácí strom sekerou",85:"Mrazík mrazí hůlkou mrazilkou",86:"Pekař hněte těsto na chleba",87:"Cukrářka zdobí dort",88:"Cel si obléká šaty",89:"Václav Havel řeční do mikrofonu",90:"Zeman se opíjí slivovicí",91:"Forejtek leští porsche",92:"Kevin brání dům",93:"Marve (ze Sám Doma) sundává ponožku",94:"Harry drží žhnoucí kliku",95:"Steve Jobs opravuje iPhone",96:"Frank Drebin ukazuje policejní odznak",97:"XindlX brnká na kytaru",98:"Zdeněk Pohlreich griluje na grilu",99:"Dave Lister si vytrhává chloupky kleštičkami"};
+        
+        const DEFAULT_MALY = {0:"čočka",1:"člověk",2:"činka",3:"čmelák",4:"čezeta",5:"cukr",6:"cibule",7:"četník",8:"cesta",9:"cedník",10:"lucifer",11:"lilek",12:"len",13:"lama",14:"lžíce",15:"luk",16:"lebka",17:"letadlo",18:"les",19:"led",20:"noc",21:"Nil",22:"ninja",23:"náměstí",24:"nůž",25:"nok",26:"náboj",27:"nota",28:"nos",29:"nádobí",30:"míč",31:"mlýn",32:"mnich",33:"máma",34:"muž",35:"mák",36:"mobil",37:"motýl",38:"myš",39:"med",40:"žáci",41:"zlato",42:"žena",43:"zmije",44:"žížala",45:"zákoník",46:"žába",47:"žeton",48:"zástěra",49:"židle",50:"kocour",51:"klíč",52:"kanec",53:"komár",54:"koza",55:"kaktus",56:"kabát",57:"kat",58:"kos",59:"kadibudka",60:"bačkora",61:"bláto",62:"banán",63:"bambus",64:"bazén",65:"býk",66:"babička",67:"batoh",68:"basa",69:"bedna",70:"tác",71:"tlouštík",72:"tank",73:"tampón",74:"těžítko",75:"tuk",76:"tabule",77:"táta",78:"taška",79:"trdelník",80:"sociálka",81:"slon",82:"syn",83:"šmoula",84:"saze",85:"škola",86:"sob",87:"strana",88:"sysel",89:"sud",90:"dečka",91:"dlaha",92:"deník",93:"dům",94:"džíny",95:"doktor",96:"debil",97:"datel",98:"deštník",99:"děda"};
+        
+        const DEFAULT_BINARNI = {"000":0,"001":1,"011":2,"111":3,"110":4,"100":5,"010":6,"101":7};
+        
+        const KARTY = {1:"♥️A",2:"♥️2",3:"♥️3",4:"♥️4",5:"♥️5",6:"♥️6",7:"♥️7",8:"♥️8",9:"♥️9",10:"♥️10",11:"♥️J",12:"♥️Q",13:"♥️K",21:"♠️A",22:"♠️2",23:"♠️3",24:"♠️4",25:"♠️5",26:"♠️6",27:"♠️7",28:"♠️8",29:"♠️9",30:"♠️10",31:"♠️J",32:"♠️Q",33:"♠️K",41:"♣️A",42:"♣️2",43:"♣️3",44:"♣️4",45:"♣️5",46:"♣️6",47:"♣️7",48:"♣️8",49:"♣️9",50:"♣️10",51:"♣️J",52:"♣️Q",53:"♣️K",61:"♦️A",62:"♦️2",63:"♦️3",64:"♦️4",65:"♦️5",66:"♦️6",67:"♦️7",68:"♦️8",69:"♦️9",70:"♦️10",71:"♦️J",72:"♦️Q",73:"♦️K"};
+
+        let state = {
+            screen: 'menu',
+            system: null,
+            mode: null,
+            velky: JSON.parse(localStorage.getItem('velky') || JSON.stringify(DEFAULT_VELKY)),
+            maly: JSON.parse(localStorage.getItem('maly') || JSON.stringify(DEFAULT_MALY)),
+            binarni: JSON.parse(localStorage.getItem('binarni') || JSON.stringify(DEFAULT_BINARNI)),
+            question: null,
+            showAnswer: false,
+            wrong: [],
+            stats: {correct: 0, wrong: 0},
+            editing: null,
+            editNum: null,
+            editVal: ''
+        };
+
+        function save(sys) {
+            localStorage.setItem(sys, JSON.stringify(state[sys]));
+        }
+
+        function parsePAO(text) {
+            const parts = text.split(' ');
+            return {
+                osoba: parts[0],
+                akce: parts[1],
+                objekt: parts.slice(2).join(' ')
+            };
+        }
+
+        function genQ() {
+            if (state.system === 'velky') {
+                const n = [~~(Math.random()*100), ~~(Math.random()*100), ~~(Math.random()*100)];
+                const p1 = parsePAO(state.velky[n[0]]);
+                const p2 = parsePAO(state.velky[n[1]]);
+                const p3 = parsePAO(state.velky[n[2]]);
+                if (state.mode === 'num-pao') {
+                    return {q: n.map(x=>('0'+x).slice(-2)).join(' '), a: p1.osoba+' '+p2.akce+' '+p3.objekt};
+                } else {
+                    return {q: p1.osoba+' '+p2.akce+' '+p3.objekt, a: n.map(x=>('0'+x).slice(-2)).join(' ')};
+                }
+            } else if (state.system === 'maly') {
+                const n = ~~(Math.random()*100);
+                if (state.mode === 'num-word') {
+                    return {q: ('0'+n).slice(-2), a: state.maly[n]};
+                } else {
+                    return {q: state.maly[n], a: ('0'+n).slice(-2)};
+                }
+            } else if (state.system === 'karty') {
+                const kn = Object.keys(KARTY).map(Number);
+                if (state.mode === 'card-num') {
+                    const c = kn[~~(Math.random()*kn.length)];
+                    return {q: KARTY[c], a: ('0'+c).slice(-2)};
+                } else if (state.mode === 'cards-pao') {
+                    const n = [kn[~~(Math.random()*kn.length)], kn[~~(Math.random()*kn.length)], kn[~~(Math.random()*kn.length)]];
+                    const p1 = parsePAO(state.velky[n[0]]);
+                    const p2 = parsePAO(state.velky[n[1]]);
+                    const p3 = parsePAO(state.velky[n[2]]);
+                    return {q: KARTY[n[0]]+' '+KARTY[n[1]]+' '+KARTY[n[2]], a: p1.osoba+' '+p2.akce+' '+p3.objekt};
+                } else {
+                    const n = [kn[~~(Math.random()*kn.length)], kn[~~(Math.random()*kn.length)], kn[~~(Math.random()*kn.length)]];
+                    const p1 = parsePAO(state.velky[n[0]]);
+                    const p2 = parsePAO(state.velky[n[1]]);
+                    const p3 = parsePAO(state.velky[n[2]]);
+                    return {q: p1.osoba+' '+p2.akce+' '+p3.objekt, a: KARTY[n[0]]+' '+KARTY[n[1]]+' '+KARTY[n[2]]};
+                }
+            } else if (state.system === 'binarni') {
+                const bk = Object.keys(state.binarni);
+                const b = bk[~~(Math.random()*bk.length)];
+                if (state.mode === 'bin-num') {
+                    return {q: b, a: state.binarni[b].toString()};
+                } else {
+                    return {q: state.binarni[b].toString(), a: b};
+                }
+            }
+        }
+
+        function nextQ() {
+            state.showAnswer = false;
+            if (state.wrong.length > 0) {
+                state.question = state.wrong.shift();
+            } else {
+                state.question = genQ();
+            }
+            render();
+        }
+
+        function startTrain() {
+            state.stats = {correct: 0, wrong: 0};
+            state.wrong = [];
+            nextQ();
+        }
+
+        function showAns() {
+            state.showAnswer = true;
+            render();
+        }
+
+        function correct() {
+            state.stats.correct++;
+            nextQ();
+        }
+
+        function wrong() {
+            state.stats.wrong++;
+            state.wrong.push(state.question);
+            nextQ();
+        }
+
+        function startEdit(sys) {
+            state.editing = sys;
+            state.screen = 'edit';
+            render();
+        }
+
+        function saveEdit() {
+            state[state.editing][state.editNum] = state.editing === 'binarni' ? parseInt(state.editVal) : state.editVal;
+            save(state.editing);
+            state.editNum = null;
+            state.editVal = '';
+            render();
+        }
+
+        function resetSys(sys) {
+            if (confirm('Opravdu obnovit výchozí?')) {
+                state[sys] = sys === 'velky' ? {...DEFAULT_VELKY} : sys === 'maly' ? {...DEFAULT_MALY} : {...DEFAULT_BINARNI};
+                save(sys);
+                render();
+            }
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (state.screen === 'menu') {
+                app.innerHTML = `
+                    <h1>PAO Trénink</h1>
+                    <div class="card relative" onclick="state.system='velky';state.screen='mode';render()">
+                        <h3>Velký systém (PAO)</h3>
+                        <p>Trénink Person-Action-Object</p>
+                        <button class="edit-btn" onclick="event.stopPropagation();startEdit('velky')">✏️ Upravit</button>
+                    </div>
+                    <div class="card relative" onclick="state.system='maly';state.screen='mode';render()">
+                        <h3>Malý systém</h3>
+                        <p>Dvojčísla na slova</p>
+                        <button class="edit-btn" onclick="event.stopPropagation();startEdit('maly')">✏️ Upravit</button>
+                    </div>
+                    <div class="card" onclick="state.system='karty';state.screen='mode';render()">
+                        <h3>Karetní systém</h3>
+                        <p>Zapamatování karet</p>
+                    </div>
+                    <div class="card relative" onclick="state.system='binarni';state.screen='mode';render()">
+                        <h3>Binární systém</h3>
+                        <p>000-111 na čísla</p>
+                        <button class="edit-btn" onclick="event.stopPropagation();startEdit('binarni')">✏️ Upravit</button>
+                    </div>
+                `;
+            }
+            
+            else if (state.screen === 'edit') {
+                const sys = state[state.editing];
+                const entries = Object.entries(sys).sort((a,b) => state.editing==='binarni' ? a[0].localeCompare(b[0]) : parseInt(a[0])-parseInt(b[0]));
+                const title = state.editing === 'velky' ? 'Velký systém' : state.editing === 'maly' ? 'Malý systém' : 'Binární systém';
+                
+                app.innerHTML = `
+                    <button class="back-btn" onclick="state.screen='menu';state.editNum=null;render()">← Zpět</button>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                        <h2 style="margin:0">${title}</h2>
+                        <button class="btn btn-danger" style="width:auto;padding:10px 20px;font-size:0.9em" onclick="resetSys('${state.editing}')">Obnovit výchozí</button>
+                    </div>
+                    <div class="scroll-container">
+                        ${entries.map(([k,v]) => `
+                            <div class="edit-item">
+                                <span class="edit-number">${k}</span>
+                                ${state.editNum === k ? `
+                                    <input class="edit-input" value="${state.editVal}" oninput="state.editVal=this.value" autofocus>
+                                    <div style="display:flex;gap:10px">
+                                        <button class="small-btn btn-success" onclick="saveEdit()">✓</button>
+                                        <button class="small-btn btn-secondary" onclick="state.editNum=null;render()">✗</button>
+                                    </div>
+                                ` : `
+                                    <span style="flex:1">${v}</span>
+                                    <button class="small-btn" style="background:#e5e7eb" onclick="state.editNum='${k}';state.editVal='${v.replace(/'/g, "\\'")}';render()">✏️</button>
+                                `}
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+            
+            else if (state.screen === 'mode') {
+                const modes = {
+                    velky: [
+                        {m:'num-pao', t:'Číslo → PAO', d:'Vidíte čísla, skládáte PAO'},
+                        {m:'pao-num', t:'PAO → Číslo', d:'Vidíte PAO, hádáte čísla'}
+                    ],
+                    maly: [
+                        {m:'num-word', t:'Číslo → Slovo', d:'Vidíte číslo, hádáte slovo'},
+                        {m:'word-num', t:'Slovo → Číslo', d:'Vidíte slovo, hádáte číslo'}
+                    ],
+                    karty: [
+                        {m:'card-num', t:'Karta → Číslo', d:'Vidíte kartu, hádáte číslo'},
+                        {m:'cards-pao', t:'3 karty → PAO', d:'Vidíte 3 karty, skládáte PAO'},
+                        {m:'pao-cards', t:'PAO → 3 karty', d:'Vidíte PAO, hádáte karty'}
+                    ],
+                    binarni: [
+                        {m:'bin-num', t:'Binární → Číslo', d:'Vidíte 000-111, hádáte číslo'},
+                        {m:'num-bin', t:'Číslo → Binární', d:'Vidíte číslo, hádáte binární'}
+                    ]
+                };
+                
+                app.innerHTML = `
+                    <button class="back-btn" onclick="state.screen='menu';render()">← Zpět</button>
+                    <h2>Vyber režim</h2>
+                    ${modes[state.system].map(({m,t,d}) => `
+                        <div class="card" onclick="state.mode='${m}';state.screen='train';startTrain()">
+                            <h3>${t}</h3>
+                            <p>${d}</p>
+                        </div>
+                    `).join('')}
+                `;
+            }
+            
+            else if (state.screen === 'train' && state.question) {
+                app.innerHTML = `
+                    <button class="back-btn" onclick="state.screen='menu';render()">← Konec</button>
+                    <div class="stats">
+                        <span style="color:#10b981">✓ ${state.stats.correct}</span>
+                        <span style="color:#ef4444">✗ ${state.stats.wrong}</span>
+                        ${state.wrong.length > 0 ? `<span style="color:#f59e0b">↻ ${state.wrong.length}</span>` : ''}
+                    </div>
+                    <div class="card">
+                        <div class="question">${state.question.q}</div>
+                        ${!state.showAnswer ? `
+                            <button class="btn" onclick="showAns()">Ukázat odpověď</button>
+                        ` : `
+                            <div class="answer">${state.question.a}</div>
+                            <div class="grid-2">
+                                <button class="btn btn-success" onclick="correct()">✓ Správně</button>
+                                <button class="btn btn-danger" onclick="wrong()">✗ Špatně</button>
+                            </div>
+                        `}
+                    </div>
+                `;
+            }
+        }
+
+        render();
+    </script>
+</body>
+</html>
