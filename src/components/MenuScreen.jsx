@@ -90,30 +90,7 @@ function MenuScreen({ onSelectSystem, onEditSystem }) {
           })}
         </div>
 
-        <div className="mt-16 text-center">
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 max-w-2xl mx-auto">
-            <p className="text-primary-100 text-sm leading-relaxed">
-              AI vibe coded development by{' '}
-              <a 
-                href="https://biela.dev/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-white hover:text-primary-200 underline transition-colors"
-              >
-                Biela.dev
-              </a>
-              , powered by{' '}
-              <a 
-                href="https://teachmecode.ae/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-white hover:text-primary-200 underline transition-colors"
-              >
-                TeachMeCode® Institute
-              </a>
-            </p>
-          </div>
-        </div>
+
       </div>
     </div>
   );
