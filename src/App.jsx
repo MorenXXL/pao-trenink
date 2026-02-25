@@ -34,7 +34,10 @@ function App() {
     correct: 0,
     wrong: 0,
     answeredCount: 0,
-    totalQuestions: 10
+    totalQuestions: 10,
+    fastestTime: Infinity,
+    totalCorrectTime: 0,
+    trainingCorrect: 0
   });
 
   const [reviewQueue, setReviewQueue] = useState([]); // Array of { question, successStreak }
@@ -44,6 +47,8 @@ function App() {
   const [currentMode, setCurrentMode] = useState(null);
   const [question, setQuestion] = useState(null);
   const [showAnswer, setShowAnswer] = useState(false);
+  const [questionStartTime, setQuestionStartTime] = useState(null);
+  const [currentRecallTime, setCurrentRecallTime] = useState(null);
 
   const { data, savedBinaries, saveBinary, deleteBinary, saveSystem, resetSystem } = useStorage();
 
@@ -61,11 +66,16 @@ function App() {
       correct: 0,
       wrong: 0,
       answeredCount: 0,
-      totalQuestions: 10
+      totalQuestions: 10,
+      fastestTime: Infinity,
+      totalCorrectTime: 0,
+      trainingCorrect: 0
     });
     setReviewQueue([]);
     setCurrentReviewItem(null);
     setPhase('training');
+    setQuestionStartTime(null);
+    setCurrentRecallTime(null);
 
     // For special modes, use appropriate screens
     if (currentSystem === 'karty' && mode === 'pao-cards') {
@@ -83,6 +93,8 @@ function App() {
 
   const generateNextQuestion = () => {
     setShowAnswer(false);
+    setQuestionStartTime(Date.now());
+    setCurrentRecallTime(null);
 
     if (phase === 'training') {
       if (sessionStats.answeredCount >= sessionStats.totalQuestions) {
@@ -130,13 +142,29 @@ function App() {
 
   const handleShowAnswer = () => {
     setShowAnswer(true);
+    if (questionStartTime && currentRecallTime === null) {
+      setCurrentRecallTime((Date.now() - questionStartTime) / 1000);
+    }
   };
 
   const handleCorrect = () => {
+    const recallTime = currentRecallTime;
+
     // Update Stats
     setSessionStats(prev => {
       const newCombo = prev.combo + 1;
       const points = 100 + (newCombo * 10); // Base 100 + 10 per combo level
+
+      let newFastestTime = prev.fastestTime;
+      let newTotalCorrectTime = prev.totalCorrectTime;
+      let newTrainingCorrect = prev.trainingCorrect || 0;
+
+      if (phase === 'training' && recallTime !== null) {
+        newFastestTime = Math.min(prev.fastestTime, recallTime);
+        newTotalCorrectTime += recallTime;
+        newTrainingCorrect += 1;
+      }
+
       return {
         ...prev,
         score: prev.score + points,
@@ -144,22 +172,16 @@ function App() {
         maxCombo: Math.max(prev.maxCombo, newCombo),
         correct: prev.correct + 1,
         // Only increment answeredCount in training phase
-        answeredCount: phase === 'training' ? prev.answeredCount + 1 : prev.answeredCount
+        answeredCount: phase === 'training' ? prev.answeredCount + 1 : prev.answeredCount,
+        fastestTime: newFastestTime,
+        totalCorrectTime: newTotalCorrectTime,
+        trainingCorrect: newTrainingCorrect
       };
     });
 
     if (phase === 'review' && currentReviewItem) {
-      // Update review item streak
-      setReviewQueue(prev => {
-        const updated = prev.map(item => {
-          if (item === currentReviewItem) {
-            return { ...item, successStreak: item.successStreak + 1 };
-          }
-          return item;
-        });
-        // Filter out completed ones
-        return updated.filter(item => item.successStreak < 3);
-      });
+      // Remove immediately upon correct answer in review mode
+      setReviewQueue(prev => prev.filter(item => item !== currentReviewItem));
     }
 
     generateNextQuestion();
@@ -256,6 +278,8 @@ function App() {
         {screen === 'summary' && (
           <SummaryScreen
             stats={sessionStats}
+            system={currentSystem}
+            mode={currentMode}
             onHome={backToMenu}
             onRestart={() => selectMode(currentMode)}
           />

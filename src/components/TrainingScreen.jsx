@@ -53,7 +53,7 @@ function TrainingScreen({
 
         {isReview && (
           <div className="bg-orange-500/30 border border-orange-300/50 rounded-xl p-3 mb-6 text-center text-white animate-pulse">
-            <span className="font-bold text-lg">⚠️ Oprava chyb</span> – odpověz správně 3x za sebou
+            <span className="font-bold text-lg">⚠️ Oprava chyb</span> – odpověz správně
           </div>
         )}
 
@@ -92,7 +92,7 @@ function TrainingScreen({
             </div>
 
             {/* Back of Card (Answer) */}
-            <div className="absolute inset-0 w-full h-full bg-white rounded-3xl shadow-2xl backface-hidden rotate-y-180 flex flex-col overflow-hidden">
+            <div className={`absolute inset-0 w-full h-full bg-white rounded-3xl shadow-2xl backface-hidden rotate-y-180 flex flex-col overflow-hidden transition-opacity duration-300 ${!showAnswer ? 'opacity-0' : 'opacity-100'}`}>
               <div className="bg-success-600 text-white px-8 py-4">
                 <h3 className="text-xl font-bold text-center">Odpověď</h3>
               </div>
