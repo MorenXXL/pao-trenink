@@ -1,6 +1,7 @@
-import React from 'react';
-import { Brain, Edit3, Layers, Binary, Spade } from 'lucide-react';
-function MenuScreen({ onSelectSystem, onEditSystem }) {
+import React, { useState } from 'react';
+import { Brain, Edit3, Layers, Binary, Spade, Settings, RotateCcw, TimerReset } from 'lucide-react';
+function MenuScreen({ onSelectSystem, onEditSystem, onResetSystem, onResetRecords }) {
+  const [activeMenu, setActiveMenu] = useState(null);
   const systems = [
     {
       id: 'velky',
@@ -60,17 +61,44 @@ function MenuScreen({ onSelectSystem, onEditSystem }) {
                 className="relative group bg-white rounded-2xl p-8 shadow-2xl hover:shadow-3xl transform hover:-translate-y-2 transition-all duration-300 cursor-pointer"
                 onClick={() => onSelectSystem(system.id)}
               >
-                {system.editable && (
+                <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onEditSystem(system.id);
-                    }}
-                    className="absolute top-4 right-4 p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-primary-600 transition-colors"
+                    onClick={() => setActiveMenu(activeMenu === system.id ? null : system.id)}
+                    className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-primary-600 transition-colors shadow-sm"
                   >
-                    <Edit3 className="w-4 h-4" />
+                    <Settings className="w-5 h-5" />
                   </button>
-                )}
+                  {activeMenu === system.id && (
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 py-2">
+                      {system.editable && (
+                        <>
+                          <button
+                            onClick={() => { onEditSystem(system.id); setActiveMenu(null); }}
+                            className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center text-gray-700 transition-colors"
+                          >
+                            <Edit3 className="w-4 h-4 mr-3" />
+                            <span className="font-semibold">Editovat systém</span>
+                          </button>
+                          <button
+                            onClick={() => { onResetSystem(system.id); setActiveMenu(null); }}
+                            className="w-full text-left px-4 py-3 hover:bg-orange-50 flex items-center text-orange-600 transition-colors"
+                          >
+                            <RotateCcw className="w-4 h-4 mr-3" />
+                            <span className="font-semibold">Resetovat systém</span>
+                          </button>
+                          <div className="h-px bg-gray-100 my-1 mx-4"></div>
+                        </>
+                      )}
+                      <button
+                        onClick={() => { onResetRecords(system.id); setActiveMenu(null); }}
+                        className="w-full text-left px-4 py-3 hover:bg-red-50 flex items-center text-red-600 transition-colors"
+                      >
+                        <TimerReset className="w-4 h-4 mr-3" />
+                        <span className="font-semibold">Vymazat rekordy času</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
 
                 <div className={`inline-flex p-4 rounded-xl bg-gradient-to-r ${colorClasses[system.color]} text-white mb-6`}>
                   <IconComponent className="w-8 h-8" />

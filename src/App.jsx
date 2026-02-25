@@ -237,6 +237,24 @@ function App() {
     setShowAnswer(false);
   };
 
+  const handleResetRecords = (systemId) => {
+    if (window.confirm('Opravdu chcete smazat všechny časové rekordy pro tento systém?')) {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(`record_${systemId}_`)) {
+          localStorage.removeItem(key);
+        }
+      });
+      alert('Rekordy pro tento systém byly úspěšně smazány.');
+    }
+  };
+
+  const handleResetSystem = (systemId) => {
+    if (window.confirm('Opravdu chcete resetovat tento systém do výchozích hodnot? Vaše vlastní úpravy v tomto systému budou ztraceny.')) {
+      resetSystem(systemId);
+      alert('Systém byl resetován do výchozích hodnot.');
+    }
+  };
+
   // Generate first question when training starts
   useEffect(() => {
     if ((screen === 'training' || screen === 'card-selection' || screen === 'binary-sequence') && currentSystem && currentMode && !question) {
@@ -251,6 +269,8 @@ function App() {
           <MenuScreen
             onSelectSystem={selectSystem}
             onEditSystem={startEdit}
+            onResetSystem={handleResetSystem}
+            onResetRecords={handleResetRecords}
           />
         )}
 

@@ -85,7 +85,7 @@ function TrainingScreen({
                   </div>
                 </div>
 
-                <div className="mt-12 text-primary-500 animate-bounce">
+                <div className={`mt-12 text-primary-500 animate-bounce transition-opacity duration-300 ${showAnswer ? 'opacity-0' : 'opacity-100'}`}>
                   Klikni pro otočení
                 </div>
               </div>
