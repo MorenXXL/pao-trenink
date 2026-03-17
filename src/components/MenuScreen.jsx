@@ -72,13 +72,15 @@ function MenuScreen({ onSelectSystem, onEditSystem, onResetSystem, onResetRecord
                 onClick={() => onSelectSystem(system.id)}
               >
                 <div className="absolute top-4 right-4 z-10" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    onClick={() => setActiveMenu(activeMenu === system.id ? null : system.id)}
-                    className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-primary-600 transition-colors shadow-sm"
-                  >
-                    <Settings className="w-5 h-5" />
-                  </button>
-                  {activeMenu === system.id && (
+                  {system.id !== 'sekvence' && (
+                    <button
+                      onClick={() => setActiveMenu(activeMenu === system.id ? null : system.id)}
+                      className="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 hover:text-primary-600 transition-colors shadow-sm"
+                    >
+                      <Settings className="w-5 h-5" />
+                    </button>
+                  )}
+                  {activeMenu === system.id && system.id !== 'sekvence' && (
                     <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 py-2">
                       {system.editable && (
                         <>
