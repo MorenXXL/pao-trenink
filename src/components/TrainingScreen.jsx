@@ -92,39 +92,41 @@ function TrainingScreen({
             </div>
 
             {/* Back of Card (Answer) */}
-            <div className={`absolute inset-0 w-full h-full bg-white rounded-3xl shadow-2xl backface-hidden rotate-y-180 flex flex-col overflow-hidden transition-opacity duration-300 ${!showAnswer ? 'opacity-0' : 'opacity-100'}`}>
-              <div className="bg-success-600 text-white px-8 py-4">
-                <h3 className="text-xl font-bold text-center">Odpověď</h3>
-              </div>
-
-              <div className="flex-grow flex flex-col items-center justify-center p-8">
-                <div className="text-center mb-8">
-                  <div className="text-5xl font-bold text-gray-800 mb-2">
-                    {question?.answer}
-                  </div>
-                  {question?.paoSequence && (
-                    <div className="text-lg text-gray-500 mt-2 font-mono">
-                      {question.paoSequence}
-                    </div>
-                  )}
+            <div className="absolute inset-0 w-full h-full bg-white rounded-3xl shadow-2xl backface-hidden rotate-y-180 flex flex-col overflow-hidden">
+              <div className={`w-full h-full flex flex-col ${showAnswer ? 'opacity-100 transition-opacity duration-300 delay-300' : 'opacity-0 transition-none'}`}>
+                <div className="bg-success-600 text-white px-8 py-4">
+                  <h3 className="text-xl font-bold text-center">Odpověď</h3>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6 w-full max-w-md">
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onCorrect(); }}
-                    className="flex items-center justify-center flex-col bg-success-100 hover:bg-success-200 text-success-700 p-6 rounded-2xl transition-colors border-2 border-success-200 group"
-                  >
-                    <CheckCircle className="w-10 h-10 mb-2 group-hover:scale-110 transition-transform" />
-                    <span className="text-xl font-bold">Správně</span>
-                  </button>
+                <div className="flex-grow flex flex-col items-center justify-center p-8">
+                  <div className="text-center mb-8">
+                    <div className="text-5xl font-bold text-gray-800 mb-2">
+                      {question?.answer}
+                    </div>
+                    {question?.paoSequence && (
+                      <div className="text-lg text-gray-500 mt-2 font-mono">
+                        {question.paoSequence}
+                      </div>
+                    )}
+                  </div>
 
-                  <button
-                    onClick={(e) => { e.stopPropagation(); onWrong(); }}
-                    className="flex items-center justify-center flex-col bg-danger-100 hover:bg-danger-200 text-danger-700 p-6 rounded-2xl transition-colors border-2 border-danger-200 group"
-                  >
-                    <XCircle className="w-10 h-10 mb-2 group-hover:scale-110 transition-transform" />
-                    <span className="text-xl font-bold">Špatně</span>
-                  </button>
+                  <div className="grid grid-cols-2 gap-6 w-full max-w-md">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onCorrect(); }}
+                      className="flex items-center justify-center flex-col bg-success-100 hover:bg-success-200 text-success-700 p-6 rounded-2xl transition-colors border-2 border-success-200 group"
+                    >
+                      <CheckCircle className="w-10 h-10 mb-2 group-hover:scale-110 transition-transform" />
+                      <span className="text-xl font-bold">Správně</span>
+                    </button>
+
+                    <button
+                      onClick={(e) => { e.stopPropagation(); onWrong(); }}
+                      className="flex items-center justify-center flex-col bg-danger-100 hover:bg-danger-200 text-danger-700 p-6 rounded-2xl transition-colors border-2 border-danger-200 group"
+                    >
+                      <XCircle className="w-10 h-10 mb-2 group-hover:scale-110 transition-transform" />
+                      <span className="text-xl font-bold">Špatně</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>

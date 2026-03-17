@@ -36,6 +36,15 @@ export function useStorage() {
     }
   });
 
+  const [savedSequences, setSavedSequences] = useState(() => {
+    try {
+      const stored = localStorage.getItem('savedSequences');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
   const saveSystem = (system, data) => {
     try {
       localStorage.setItem(system, JSON.stringify(data));
@@ -82,11 +91,47 @@ export function useStorage() {
       console.error('Failed to delete binary data:', error);
     }
   };
+
+  const saveSequence = (data) => {
+    try {
+      let updatedSequences;
+      if (data.id) {
+        // Edit existing
+        updatedSequences = savedSequences.map(seq => seq.id === data.id ? data : seq);
+      } else {
+        // Create new
+        const newItem = {
+          id: Date.now().toString(),
+          timestamp: Date.now(),
+          ...data
+        };
+        updatedSequences = [...savedSequences, newItem];
+      }
+      setSavedSequences(updatedSequences);
+      localStorage.setItem('savedSequences', JSON.stringify(updatedSequences));
+    } catch (error) {
+      console.error('Failed to save sequence data:', error);
+    }
+  };
+
+  const deleteSequence = (id) => {
+    try {
+      const updatedSequences = savedSequences.filter(item => item.id !== id);
+      setSavedSequences(updatedSequences);
+      localStorage.setItem('savedSequences', JSON.stringify(updatedSequences));
+    } catch (error) {
+      console.error('Failed to delete sequence data:', error);
+    }
+  };
+
   return {
     data: { velky, maly, binarni },
     savedBinaries,
     saveBinary,
     deleteBinary,
+    savedSequences,
+    saveSequence,
+    deleteSequence,
     saveSystem,
     resetSystem
   };

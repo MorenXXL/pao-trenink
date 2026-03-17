@@ -12,6 +12,9 @@ const TextConverterScreen = lazy(() => import('./components/TextConverterScreen'
 const SavedBinaryScreen = lazy(() => import('./components/SavedBinaryScreen'));
 const EditScreen = lazy(() => import('./components/EditScreen'));
 const SummaryScreen = lazy(() => import('./components/SummaryScreen'));
+const SavedSequencesListScreen = lazy(() => import('./components/SavedSequencesListScreen'));
+const SavedSequenceEditScreen = lazy(() => import('./components/SavedSequenceEditScreen'));
+const SavedSequenceTrainingScreen = lazy(() => import('./components/SavedSequenceTrainingScreen'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -50,11 +53,18 @@ function App() {
   const [questionStartTime, setQuestionStartTime] = useState(null);
   const [currentRecallTime, setCurrentRecallTime] = useState(null);
 
-  const { data, savedBinaries, saveBinary, deleteBinary, saveSystem, resetSystem } = useStorage();
+  const [trainingSequenceIndex, setTrainingSequenceIndex] = useState(0);
+
+  const { data, savedBinaries, saveBinary, deleteBinary, savedSequences, saveSequence, deleteSequence, saveSystem, resetSystem } = useStorage();
 
   const selectSystem = (system) => {
     setCurrentSystem(system);
-    setScreen('mode');
+    if (system === 'sekvence') {
+       // Direct to the sequence list screen, treat "Uložené sekvence" differently
+       setScreen('saved-sequences-list');
+    } else {
+       setScreen('mode');
+    }
   };
 
   const selectMode = (mode) => {
@@ -214,7 +224,12 @@ function App() {
 
   const startEdit = (system) => {
     setCurrentSystem(system);
-    setScreen('edit');
+    if (system === 'sekvence') {
+      // Direct edit button from menu for sekvence goes to list instead
+      setScreen('saved-sequences-list');
+    } else {
+      setScreen('edit');
+    }
   };
 
   const handleEditSave = (key, value) => {
@@ -354,6 +369,61 @@ function App() {
             savedBinaries={savedBinaries || []}
             onDeleteBinary={deleteBinary}
           />
+        )}
+
+        {/* --- New Saved Sequences Screens --- */}
+        {screen === 'saved-sequences-list' && (
+          <SavedSequencesListScreen
+            sequences={savedSequences}
+            onBack={backToMenu}
+            onAdd={() => {
+              setCurrentSystem('sekvence');
+              setQuestion(null); // use question state to pass selected sequence to edit
+              setScreen('saved-sequence-edit');
+            }}
+            onEdit={(seq) => {
+              setCurrentSystem('sekvence');
+              setQuestion(seq); // Pass sequence
+              setScreen('saved-sequence-edit');
+            }}
+            onDelete={deleteSequence}
+            onTrain={() => {
+              if (savedSequences && savedSequences.length > 0) {
+                 setTrainingSequenceIndex(0);
+                 setScreen('saved-sequence-training');
+              }
+            }}
+          />
+        )}
+
+        {screen === 'saved-sequence-edit' && (
+           <SavedSequenceEditScreen
+             sequence={question} // contains sequence data
+             onSave={(data) => {
+               saveSequence(data);
+               setScreen('saved-sequences-list');
+             }}
+             onCancel={() => setScreen('saved-sequences-list')}
+           />
+        )}
+
+        {screen === 'saved-sequence-training' && savedSequences && savedSequences.length > 0 && (
+           <SavedSequenceTrainingScreen
+             sequence={savedSequences[trainingSequenceIndex]}
+             isFirst={trainingSequenceIndex === 0}
+             isLast={trainingSequenceIndex === savedSequences.length - 1}
+             onNext={() => {
+                if (trainingSequenceIndex < savedSequences.length - 1) {
+                   setTrainingSequenceIndex(trainingSequenceIndex + 1);
+                }
+             }}
+             onPrev={() => {
+                if (trainingSequenceIndex > 0) {
+                   setTrainingSequenceIndex(trainingSequenceIndex - 1);
+                }
+             }}
+             onBack={() => setScreen('saved-sequences-list')}
+           />
         )}
       </Suspense>
     </div>

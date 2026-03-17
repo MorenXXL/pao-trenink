@@ -34,6 +34,15 @@ function MenuScreen({ onSelectSystem, onEditSystem, onResetSystem, onResetRecord
       icon: Binary,
       color: 'warning',
       editable: true
+    },
+    {
+      id: 'sekvence',
+      title: 'Uložené sekvence',
+      description: 'Uložené sekvence a kódy k procvičování',
+      icon: Brain,
+      color: 'indigo',
+      editable: true,
+      hidePlayButton: true // Special flag for this system
     }
   ];
 
@@ -41,7 +50,8 @@ function MenuScreen({ onSelectSystem, onEditSystem, onResetSystem, onResetRecord
     primary: 'from-primary-500 to-primary-600',
     success: 'from-success-500 to-success-600',
     danger: 'from-danger-500 to-danger-600',
-    warning: 'from-warning-500 to-warning-600'
+    warning: 'from-warning-500 to-warning-600',
+    indigo: 'from-indigo-500 to-indigo-600'
   };
 
   return (
@@ -107,12 +117,14 @@ function MenuScreen({ onSelectSystem, onEditSystem, onResetSystem, onResetRecord
                 <h3 className="text-2xl font-bold text-gray-900 mb-3">{system.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{system.description}</p>
 
-                <div className="mt-6 flex items-center text-primary-600 group-hover:text-primary-700 transition-colors">
-                  <span className="font-semibold">Začít trénink</span>
-                  <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </div>
+                {!system.hidePlayButton && (
+                  <div className="mt-6 flex items-center text-primary-600 group-hover:text-primary-700 transition-colors">
+                    <span className="font-semibold">Začít trénink</span>
+                    <svg className="w-5 h-5 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                )}
               </div>
             );
           })}
