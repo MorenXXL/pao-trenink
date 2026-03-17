@@ -15,6 +15,7 @@ const SummaryScreen = lazy(() => import('./components/SummaryScreen'));
 const SavedSequencesListScreen = lazy(() => import('./components/SavedSequencesListScreen'));
 const SavedSequenceEditScreen = lazy(() => import('./components/SavedSequenceEditScreen'));
 const SavedSequenceTrainingScreen = lazy(() => import('./components/SavedSequenceTrainingScreen'));
+const SavedSequencesBackupScreen = lazy(() => import('./components/SavedSequencesBackupScreen'));
 
 // Loading component
 const LoadingSpinner = () => (
@@ -55,7 +56,7 @@ function App() {
 
   const [trainingSequenceIndex, setTrainingSequenceIndex] = useState(0);
 
-  const { data, savedBinaries, saveBinary, deleteBinary, savedSequences, saveSequence, deleteSequence, saveSystem, resetSystem } = useStorage();
+  const { data, savedBinaries, saveBinary, deleteBinary, savedSequences, saveSequence, deleteSequence, importSequences, saveSystem, resetSystem } = useStorage();
 
   const selectSystem = (system) => {
     setCurrentSystem(system);
@@ -393,6 +394,7 @@ function App() {
                  setScreen('saved-sequence-training');
               }
             }}
+            onBackup={() => setScreen('saved-sequence-backup')}
           />
         )}
 
@@ -423,6 +425,14 @@ function App() {
                 }
              }}
              onBack={() => setScreen('saved-sequences-list')}
+           />
+        )}
+
+        {screen === 'saved-sequence-backup' && (
+           <SavedSequencesBackupScreen
+             sequences={savedSequences}
+             onBack={() => setScreen('saved-sequences-list')}
+             onImport={importSequences}
            />
         )}
       </Suspense>

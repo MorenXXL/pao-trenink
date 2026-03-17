@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Plus, Play, Settings, Trash2, Edit } from 'lucide-react';
 
-function SavedSequencesListScreen({ onBack, onAdd, onEdit, onTrain, onDelete, sequences }) {
+function SavedSequencesListScreen({ onBack, onAdd, onEdit, onTrain, onDelete, onBackup, sequences }) {
   const [selectedSequence, setSelectedSequence] = useState(null);
 
   const handleDelete = (id, e) => {
@@ -46,6 +46,16 @@ function SavedSequencesListScreen({ onBack, onAdd, onEdit, onTrain, onDelete, se
                 <Plus className="w-5 h-5 mr-2" />
                 Přidat sekvenci
               </button>
+              
+              <div className="pt-2">
+                 <button
+                   onClick={onBackup}
+                   className="flex w-full items-center justify-center bg-indigo-700 hover:bg-indigo-800 text-indigo-200 hover:text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors border border-indigo-500 hover:border-indigo-400"
+                 >
+                   <Settings className="w-4 h-4 mr-2" />
+                   Nástroje zálohování
+                 </button>
+              </div>
             </div>
           </div>
 

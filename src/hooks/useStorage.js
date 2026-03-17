@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DEFAULT_VELKY, DEFAULT_MALY, DEFAULT_BINARNI } from '../data/constants';
+import { db } from '../lib/firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 export function useStorage() {
   const [velky, setVelky] = useState(() => {
@@ -45,12 +47,72 @@ export function useStorage() {
     }
   });
 
+  const syncToDb = async () => {
+    try {
+      const payload = {
+        velky: JSON.parse(localStorage.getItem('velky') || 'null') || DEFAULT_VELKY,
+        maly: JSON.parse(localStorage.getItem('maly') || 'null') || DEFAULT_MALY,
+        binarni: JSON.parse(localStorage.getItem('binarni') || 'null') || DEFAULT_BINARNI,
+        savedBinaries: JSON.parse(localStorage.getItem('savedBinaries') || '[]'),
+        savedSequences: JSON.parse(localStorage.getItem('savedSequences') || '[]'),
+        updated_at: new Date().toISOString()
+      };
+      
+      const docRef = doc(db, 'pao_app', 'user_data');
+      await setDoc(docRef, payload, { merge: true });
+    } catch (error) {
+      console.error('Failed to sync to Firebase:', error);
+    }
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchFromDb = async () => {
+      try {
+        const docRef = doc(db, 'pao_app', 'user_data');
+        const docSnap = await getDoc(docRef);
+          
+        if (docSnap.exists() && isMounted) {
+          const dbData = docSnap.data();
+          
+          if (dbData.velky) {
+            setVelky(dbData.velky);
+            localStorage.setItem('velky', JSON.stringify(dbData.velky));
+          }
+          if (dbData.maly) {
+            setMaly(dbData.maly);
+            localStorage.setItem('maly', JSON.stringify(dbData.maly));
+          }
+          if (dbData.binarni) {
+            setBinarni(dbData.binarni);
+            localStorage.setItem('binarni', JSON.stringify(dbData.binarni));
+          }
+          if (dbData.savedBinaries) {
+            setSavedBinaries(dbData.savedBinaries);
+            localStorage.setItem('savedBinaries', JSON.stringify(dbData.savedBinaries));
+          }
+          if (dbData.savedSequences) {
+            setSavedSequences(dbData.savedSequences);
+            localStorage.setItem('savedSequences', JSON.stringify(dbData.savedSequences));
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch from Firebase:', error);
+      }
+    };
+    
+    fetchFromDb();
+    
+    return () => { isMounted = false; };
+  }, []);
+
   const saveSystem = (system, data) => {
     try {
       localStorage.setItem(system, JSON.stringify(data));
       if (system === 'velky') setVelky(data);
       else if (system === 'maly') setMaly(data);
       else if (system === 'binarni') setBinarni(data);
+      syncToDb();
     } catch (error) {
       console.error('Failed to save to localStorage:', error);
     }
@@ -77,6 +139,7 @@ export function useStorage() {
       const updatedBinaries = [...savedBinaries, newItem];
       setSavedBinaries(updatedBinaries);
       localStorage.setItem('savedBinaries', JSON.stringify(updatedBinaries));
+      syncToDb();
     } catch (error) {
       console.error('Failed to save binary data:', error);
     }
@@ -87,6 +150,7 @@ export function useStorage() {
       const updatedBinaries = savedBinaries.filter(item => item.id !== id);
       setSavedBinaries(updatedBinaries);
       localStorage.setItem('savedBinaries', JSON.stringify(updatedBinaries));
+      syncToDb();
     } catch (error) {
       console.error('Failed to delete binary data:', error);
     }
@@ -109,6 +173,7 @@ export function useStorage() {
       }
       setSavedSequences(updatedSequences);
       localStorage.setItem('savedSequences', JSON.stringify(updatedSequences));
+      syncToDb();
     } catch (error) {
       console.error('Failed to save sequence data:', error);
     }
@@ -119,8 +184,19 @@ export function useStorage() {
       const updatedSequences = savedSequences.filter(item => item.id !== id);
       setSavedSequences(updatedSequences);
       localStorage.setItem('savedSequences', JSON.stringify(updatedSequences));
+      syncToDb();
     } catch (error) {
       console.error('Failed to delete sequence data:', error);
+    }
+  };
+
+  const importSequences = (importedData) => {
+    try {
+      setSavedSequences(importedData);
+      localStorage.setItem('savedSequences', JSON.stringify(importedData));
+      syncToDb();
+    } catch (error) {
+      console.error('Failed to import sequence data:', error);
     }
   };
 
@@ -132,6 +208,7 @@ export function useStorage() {
     savedSequences,
     saveSequence,
     deleteSequence,
+    importSequences,
     saveSystem,
     resetSystem
   };
