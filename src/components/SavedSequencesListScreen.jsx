@@ -65,7 +65,7 @@ function SavedSequencesListScreen({ onBack, onAdd, onEdit, onTrain, onDelete, se
                       className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-4 hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer"
                       onClick={() => setSelectedSequence(selectedSequence?.id === seq.id ? null : seq)}
                     >
-                      <h4 className="text-lg font-bold text-gray-900 truncate pr-4">{seq.name}</h4>
+                      <h4 className="flex-1 text-base font-bold text-gray-900 line-clamp-2 break-words pr-4">{seq.name}</h4>
                       
                       <div className="flex items-center space-x-2">
                         <button
