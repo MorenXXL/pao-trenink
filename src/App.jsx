@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import MenuScreen from './components/MenuScreen';
-import { useStorage } from './hooks/useStorage';
 import { generateQuestion } from './utils/questionGenerator';
+import { DEFAULT_VELKY, DEFAULT_MALY, DEFAULT_BINARNI, SAVED_SEQUENCES } from './data/constants';
 
 // Lazy load screens
 const ModeScreen = lazy(() => import('./components/ModeScreen'));
@@ -9,13 +9,14 @@ const TrainingScreen = lazy(() => import('./components/TrainingScreen'));
 const CardSelectionScreen = lazy(() => import('./components/CardSelectionScreen'));
 const BinarySequenceScreen = lazy(() => import('./components/BinarySequenceScreen'));
 const TextConverterScreen = lazy(() => import('./components/TextConverterScreen'));
-const SavedBinaryScreen = lazy(() => import('./components/SavedBinaryScreen'));
-const EditScreen = lazy(() => import('./components/EditScreen'));
 const SummaryScreen = lazy(() => import('./components/SummaryScreen'));
 const SavedSequencesListScreen = lazy(() => import('./components/SavedSequencesListScreen'));
-const SavedSequenceEditScreen = lazy(() => import('./components/SavedSequenceEditScreen'));
 const SavedSequenceTrainingScreen = lazy(() => import('./components/SavedSequenceTrainingScreen'));
 const SavedSequencesBackupScreen = lazy(() => import('./components/SavedSequencesBackupScreen'));
+const ShowSystemScreen = lazy(() => import('./components/ShowSystemScreen'));
+
+// Fixed reference data — defined in code, no editing/storage at runtime.
+const data = { velky: DEFAULT_VELKY, maly: DEFAULT_MALY, binarni: DEFAULT_BINARNI };
 
 // Loading component
 const LoadingSpinner = () => (
@@ -56,7 +57,34 @@ function App() {
 
   const [trainingSequenceIndex, setTrainingSequenceIndex] = useState(0);
 
-  const { data, savedBinaries, saveBinary, deleteBinary, savedSequences, saveSequence, deleteSequence, importSequences, saveSystem, resetSystem } = useStorage();
+  // Sequences: seeded from code (SAVED_SEQUENCES), optionally overridden by a
+  // local import (persisted to localStorage on this device). No cloud sync.
+  const [savedSequences, setSavedSequences] = useState(() => {
+    try {
+      const stored = localStorage.getItem('savedSequences');
+      return stored ? JSON.parse(stored) : SAVED_SEQUENCES;
+    } catch {
+      return SAVED_SEQUENCES;
+    }
+  });
+
+  const importSequences = (importedData) => {
+    setSavedSequences(importedData);
+    try {
+      localStorage.setItem('savedSequences', JSON.stringify(importedData));
+    } catch (error) {
+      console.error('Failed to save imported sequences:', error);
+    }
+  };
+
+  const restoreDefaultSequences = () => {
+    setSavedSequences(SAVED_SEQUENCES);
+    try {
+      localStorage.removeItem('savedSequences');
+    } catch (error) {
+      console.error('Failed to restore default sequences:', error);
+    }
+  };
 
   const selectSystem = (system) => {
     setCurrentSystem(system);
@@ -85,6 +113,7 @@ function App() {
     setReviewQueue([]);
     setCurrentReviewItem(null);
     setPhase('training');
+    setQuestion(null); // ensure the first question is freshly generated on restart
     setQuestionStartTime(null);
     setCurrentRecallTime(null);
 
@@ -93,8 +122,6 @@ function App() {
       setScreen('card-selection');
     } else if (currentSystem === 'binarni' && mode === 'text-utf8') {
       setScreen('text-converter');
-    } else if (currentSystem === 'binarni' && mode === 'saved-binary') {
-      setScreen('saved-binary');
     } else if (currentSystem === 'binarni' && ['seq-pao', 'pao-seq', 'seq-word', 'word-seq'].includes(mode)) {
       setScreen('binary-sequence');
     } else {
@@ -102,18 +129,23 @@ function App() {
     }
   };
 
-  const generateNextQuestion = () => {
+  // `overrides` lets callers pass the freshly computed answeredCount / reviewQueue,
+  // because state updates from setState are not yet visible inside this same tick.
+  const generateNextQuestion = (overrides = {}) => {
     setShowAnswer(false);
     setQuestionStartTime(Date.now());
     setCurrentRecallTime(null);
 
+    const answeredCount = overrides.answeredCount ?? sessionStats.answeredCount;
+    const queue = overrides.reviewQueue ?? reviewQueue;
+
     if (phase === 'training') {
-      if (sessionStats.answeredCount >= sessionStats.totalQuestions) {
+      if (answeredCount >= sessionStats.totalQuestions) {
         // End of training phase
-        if (reviewQueue.length > 0) {
+        if (queue.length > 0) {
           setPhase('review');
           // Pick first review item
-          const nextReview = reviewQueue[0];
+          const nextReview = queue[0];
           setCurrentReviewItem(nextReview);
           setQuestion(nextReview.question);
         } else {
@@ -125,22 +157,22 @@ function App() {
         setQuestion(newQuestion);
       }
     } else if (phase === 'review') {
-      if (reviewQueue.length === 0) {
+      if (queue.length === 0) {
         setQuestion(null);
         finishSession();
       } else {
         // Pick a random item from review queue that isn't the current one (if possible)
         let candidateIndex = 0;
-        if (reviewQueue.length > 1) {
-          const availableIndices = reviewQueue
+        if (queue.length > 1) {
+          const availableIndices = queue
             .map((_, idx) => idx)
-            .filter(idx => reviewQueue[idx] !== currentReviewItem);
+            .filter(idx => queue[idx] !== currentReviewItem);
 
           if (availableIndices.length > 0) {
             candidateIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
           }
         }
-        const nextReview = reviewQueue[candidateIndex];
+        const nextReview = queue[candidateIndex];
         setCurrentReviewItem(nextReview);
         setQuestion(nextReview.question);
       }
@@ -160,6 +192,9 @@ function App() {
 
   const handleCorrect = () => {
     const recallTime = currentRecallTime;
+    const newAnsweredCount = phase === 'training'
+      ? sessionStats.answeredCount + 1
+      : sessionStats.answeredCount;
 
     // Update Stats
     setSessionStats(prev => {
@@ -190,15 +225,21 @@ function App() {
       };
     });
 
+    let nextQueue = reviewQueue;
     if (phase === 'review' && currentReviewItem) {
       // Remove immediately upon correct answer in review mode
-      setReviewQueue(prev => prev.filter(item => item !== currentReviewItem));
+      nextQueue = reviewQueue.filter(item => item !== currentReviewItem);
+      setReviewQueue(nextQueue);
     }
 
-    generateNextQuestion();
+    generateNextQuestion({ answeredCount: newAnsweredCount, reviewQueue: nextQueue });
   };
 
   const handleWrong = () => {
+    const newAnsweredCount = phase === 'training'
+      ? sessionStats.answeredCount + 1
+      : sessionStats.answeredCount;
+
     setSessionStats(prev => ({
       ...prev,
       combo: 0, // Reset combo
@@ -208,34 +249,19 @@ function App() {
     }));
 
     // Add to review queue if not already there
+    let nextQueue = reviewQueue;
     if (phase === 'training') {
       const newItem = { question: question, successStreak: 0 };
-      setReviewQueue(prev => [...prev, newItem]);
+      nextQueue = [...reviewQueue, newItem];
+      setReviewQueue(nextQueue);
     } else if (phase === 'review' && currentReviewItem) {
-      setReviewQueue(prev => prev.map(item => {
-        if (item === currentReviewItem) {
-          return { ...item, successStreak: 0 };
-        }
-        return item;
-      }));
+      // Každou chybu opakujeme jen jednou — po pokusu ji z fronty odebereme
+      // bez ohledu na to, zda byla podruhé správně nebo špatně.
+      nextQueue = reviewQueue.filter(item => item !== currentReviewItem);
+      setReviewQueue(nextQueue);
     }
 
-    generateNextQuestion();
-  };
-
-  const startEdit = (system) => {
-    setCurrentSystem(system);
-    if (system === 'sekvence') {
-      // Direct edit button from menu for sekvence goes to list instead
-      setScreen('saved-sequences-list');
-    } else {
-      setScreen('edit');
-    }
-  };
-
-  const handleEditSave = (key, value) => {
-    const newData = { ...data[currentSystem], [key]: value };
-    saveSystem(currentSystem, newData);
+    generateNextQuestion({ answeredCount: newAnsweredCount, reviewQueue: nextQueue });
   };
 
   const backToMenu = () => {
@@ -253,6 +279,11 @@ function App() {
     setShowAnswer(false);
   };
 
+  const showSystem = (systemId) => {
+    setCurrentSystem(systemId);
+    setScreen('show-system');
+  };
+
   const handleResetRecords = (systemId) => {
     if (window.confirm('Opravdu chcete smazat všechny časové rekordy pro tento systém?')) {
       Object.keys(localStorage).forEach(key => {
@@ -261,13 +292,6 @@ function App() {
         }
       });
       alert('Rekordy pro tento systém byly úspěšně smazány.');
-    }
-  };
-
-  const handleResetSystem = (systemId) => {
-    if (window.confirm('Opravdu chcete resetovat tento systém do výchozích hodnot? Vaše vlastní úpravy v tomto systému budou ztraceny.')) {
-      resetSystem(systemId);
-      alert('Systém byl resetován do výchozích hodnot.');
     }
   };
 
@@ -284,9 +308,16 @@ function App() {
         {screen === 'menu' && (
           <MenuScreen
             onSelectSystem={selectSystem}
-            onEditSystem={startEdit}
-            onResetSystem={handleResetSystem}
             onResetRecords={handleResetRecords}
+            onShowSystem={showSystem}
+          />
+        )}
+
+        {screen === 'show-system' && currentSystem && (
+          <ShowSystemScreen
+            system={currentSystem}
+            data={data}
+            onBack={backToMenu}
           />
         )}
 
@@ -321,16 +352,6 @@ function App() {
           />
         )}
 
-        {screen === 'edit' && currentSystem && (
-          <EditScreen
-            system={currentSystem}
-            data={data[currentSystem]}
-            onBack={backToMenu}
-            onSave={handleEditSave}
-            onReset={() => resetSystem(currentSystem)}
-          />
-        )}
-
         {screen === 'card-selection' && question && (
           <CardSelectionScreen
             question={question}
@@ -347,7 +368,7 @@ function App() {
           <BinarySequenceScreen
             question={question}
             mode={currentMode}
-            showAnswer={handleShowAnswer}
+            onShowAnswer={handleShowAnswer}
             stats={sessionStats}
             wrongCount={reviewQueue.length}
             onBack={backToModes}
@@ -360,34 +381,14 @@ function App() {
           <TextConverterScreen
             onBack={backToModes}
             data={data}
-            onSaveBinary={saveBinary}
           />
         )}
 
-        {screen === 'saved-binary' && (
-          <SavedBinaryScreen
-            onBack={backToModes}
-            savedBinaries={savedBinaries || []}
-            onDeleteBinary={deleteBinary}
-          />
-        )}
-
-        {/* --- New Saved Sequences Screens --- */}
+        {/* --- Saved Sequences (read-only, defined in code) --- */}
         {screen === 'saved-sequences-list' && (
           <SavedSequencesListScreen
             sequences={savedSequences}
             onBack={backToMenu}
-            onAdd={() => {
-              setCurrentSystem('sekvence');
-              setQuestion(null); // use question state to pass selected sequence to edit
-              setScreen('saved-sequence-edit');
-            }}
-            onEdit={(seq) => {
-              setCurrentSystem('sekvence');
-              setQuestion(seq); // Pass sequence
-              setScreen('saved-sequence-edit');
-            }}
-            onDelete={deleteSequence}
             onTrain={() => {
               if (savedSequences && savedSequences.length > 0) {
                  setTrainingSequenceIndex(0);
@@ -398,14 +399,12 @@ function App() {
           />
         )}
 
-        {screen === 'saved-sequence-edit' && (
-           <SavedSequenceEditScreen
-             sequence={question} // contains sequence data
-             onSave={(data) => {
-               saveSequence(data);
-               setScreen('saved-sequences-list');
-             }}
-             onCancel={() => setScreen('saved-sequences-list')}
+        {screen === 'saved-sequence-backup' && (
+           <SavedSequencesBackupScreen
+             sequences={savedSequences}
+             onBack={() => setScreen('saved-sequences-list')}
+             onImport={importSequences}
+             onRestoreDefaults={restoreDefaultSequences}
            />
         )}
 
@@ -425,14 +424,6 @@ function App() {
                 }
              }}
              onBack={() => setScreen('saved-sequences-list')}
-           />
-        )}
-
-        {screen === 'saved-sequence-backup' && (
-           <SavedSequencesBackupScreen
-             sequences={savedSequences}
-             onBack={() => setScreen('saved-sequences-list')}
-             onImport={importSequences}
            />
         )}
       </Suspense>

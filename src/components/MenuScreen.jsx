@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Brain, Edit3, Layers, Binary, Spade, Settings, RotateCcw, TimerReset } from 'lucide-react';
-function MenuScreen({ onSelectSystem, onEditSystem, onResetSystem, onResetRecords }) {
+import { Brain, Layers, Binary, Spade, Settings, TimerReset, Table2 } from 'lucide-react';
+function MenuScreen({ onSelectSystem, onResetRecords, onShowSystem }) {
   const [activeMenu, setActiveMenu] = useState(null);
   const systems = [
     {
@@ -82,25 +82,14 @@ function MenuScreen({ onSelectSystem, onEditSystem, onResetSystem, onResetRecord
                   )}
                   {activeMenu === system.id && system.id !== 'sekvence' && (
                     <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 py-2">
-                      {system.editable && (
-                        <>
-                          <button
-                            onClick={() => { onEditSystem(system.id); setActiveMenu(null); }}
-                            className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center text-gray-700 transition-colors"
-                          >
-                            <Edit3 className="w-4 h-4 mr-3" />
-                            <span className="font-semibold">Editovat systém</span>
-                          </button>
-                          <button
-                            onClick={() => { onResetSystem(system.id); setActiveMenu(null); }}
-                            className="w-full text-left px-4 py-3 hover:bg-orange-50 flex items-center text-orange-600 transition-colors"
-                          >
-                            <RotateCcw className="w-4 h-4 mr-3" />
-                            <span className="font-semibold">Resetovat systém</span>
-                          </button>
-                          <div className="h-px bg-gray-100 my-1 mx-4"></div>
-                        </>
-                      )}
+                      <button
+                        onClick={() => { onShowSystem(system.id); setActiveMenu(null); }}
+                        className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center text-gray-700 transition-colors"
+                      >
+                        <Table2 className="w-4 h-4 mr-3" />
+                        <span className="font-semibold">Ukázat systém</span>
+                      </button>
+                      <div className="h-px bg-gray-100 my-1 mx-4"></div>
                       <button
                         onClick={() => { onResetRecords(system.id); setActiveMenu(null); }}
                         className="w-full text-left px-4 py-3 hover:bg-red-50 flex items-center text-red-600 transition-colors"

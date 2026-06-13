@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { ArrowLeft, RotateCcw, Save, Trash2 } from 'lucide-react';
+import { ArrowLeft, RotateCcw } from 'lucide-react';
 
-function TextConverterScreen({ 
-  onBack, 
-  data,
-  onSaveBinary
+function TextConverterScreen({
+  onBack,
+  data
 }) {
   const [inputText, setInputText] = useState('');
   const [result, setResult] = useState(null);
@@ -114,22 +113,6 @@ function TextConverterScreen({
     setShowResult(false);
   };
 
-  const handleSave = () => {
-    console.log('Save button clicked');
-    console.log('Result:', result);
-    console.log('onSaveBinary function:', onSaveBinary);
-    if (result && onSaveBinary) {
-      console.log('Saving binary data:', result);
-      onSaveBinary(result);
-      alert('ULOŽENO!');
-      handleClear();
-    } else {
-      console.log('Cannot save - missing result or onSaveBinary function');
-      console.log('Result exists:', !!result);
-      console.log('onSaveBinary exists:', !!onSaveBinary);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-500 via-primary-600 to-purple-700 p-6">
       <div className="max-w-4xl mx-auto">
@@ -234,13 +217,6 @@ function TextConverterScreen({
 
                 {/* Action buttons */}
                 <div className="flex justify-center space-x-4">
-                  <button
-                    onClick={handleSave}
-                    className="flex items-center bg-success-600 hover:bg-success-700 text-white px-6 py-3 rounded-xl font-semibold transition-colors shadow-lg"
-                  >
-                    <Save className="w-5 h-5 mr-2" />
-                    Uložit
-                  </button>
                   <button
                     onClick={handleClear}
                     className="flex items-center bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-xl font-semibold transition-colors shadow-lg"

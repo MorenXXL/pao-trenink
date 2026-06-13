@@ -1,20 +1,8 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Plus, Play, Settings, Trash2, Edit } from 'lucide-react';
+import { ArrowLeft, Play, Settings } from 'lucide-react';
 
-function SavedSequencesListScreen({ onBack, onAdd, onEdit, onTrain, onDelete, onBackup, sequences }) {
+function SavedSequencesListScreen({ onBack, onTrain, onBackup, sequences }) {
   const [selectedSequence, setSelectedSequence] = useState(null);
-
-  const handleDelete = (id, e) => {
-    e.stopPropagation();
-    if (confirm('Opravdu chcete smazat tuto uloženou sekvenci?')) {
-      onDelete(id);
-    }
-  };
-
-  const handleEdit = (sequence, e) => {
-    e.stopPropagation();
-    onEdit(sequence);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-800 p-6">
@@ -39,14 +27,7 @@ function SavedSequencesListScreen({ onBack, onAdd, onEdit, onTrain, onDelete, on
                 <Play className="w-6 h-6 mr-2" />
                 Trénovat
               </button>
-              <button
-                onClick={onAdd}
-                className="flex items-center justify-center bg-indigo-500 hover:bg-indigo-400 text-white px-6 py-3 rounded-xl font-semibold transition-colors shadow-sm"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Přidat sekvenci
-              </button>
-              
+
               <div className="pt-2">
                  <button
                    onClick={onBackup}
@@ -71,28 +52,11 @@ function SavedSequencesListScreen({ onBack, onAdd, onEdit, onTrain, onDelete, on
               <div className="space-y-3">
                 {sequences.map((seq) => (
                   <div key={seq.id}>
-                    <div 
+                    <div
                       className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-4 hover:border-indigo-300 hover:bg-indigo-50 transition-colors cursor-pointer"
                       onClick={() => setSelectedSequence(selectedSequence?.id === seq.id ? null : seq)}
                     >
                       <h4 className="flex-1 text-base font-bold text-gray-900 line-clamp-2 break-words pr-4">{seq.name}</h4>
-                      
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={(e) => handleEdit(seq, e)}
-                          className="p-2 text-gray-400 hover:text-primary-600 transition-colors rounded-lg hover:bg-white"
-                          title="Upravit"
-                        >
-                           <Edit className="w-5 h-5" />
-                        </button>
-                        <button
-                          onClick={(e) => handleDelete(seq.id, e)}
-                          className="p-2 text-gray-400 hover:text-danger-600 transition-colors rounded-lg hover:bg-white"
-                          title="Smazat"
-                        >
-                           <Trash2 className="w-5 h-5" />
-                        </button>
-                      </div>
                     </div>
                     {/* Collapsible Details */}
                     {selectedSequence?.id === seq.id && (

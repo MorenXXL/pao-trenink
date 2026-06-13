@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Download, Upload, Copy, Check, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Upload, Copy, Check, AlertCircle, RotateCcw } from 'lucide-react';
 
-function SavedSequencesBackupScreen({ onBack, sequences, onImport }) {
+function SavedSequencesBackupScreen({ onBack, sequences, onImport, onRestoreDefaults }) {
   const [importData, setImportData] = useState('');
   const [copied, setCopied] = useState(false);
   const [importStatus, setImportStatus] = useState(null); // 'success', 'error', null
 
-  // Generate JSON string for export
-  const exportString = JSON.stringify(sequences || []);
+  // Generate JSON string for export (pretty-printed for readability)
+  const exportString = JSON.stringify(sequences || [], null, 2);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(exportString).then(() => {
@@ -21,13 +21,13 @@ function SavedSequencesBackupScreen({ onBack, sequences, onImport }) {
       if (!importData.trim()) {
         throw new Error("Prázdná data");
       }
-      
+
       const parsed = JSON.parse(importData);
-      
+
       if (!Array.isArray(parsed)) {
         throw new Error("Špatný formát dat");
       }
-      
+
       // Basic validation
       const isValid = parsed.every(item => item.id && item.name);
       if (!isValid) {
@@ -37,16 +37,23 @@ function SavedSequencesBackupScreen({ onBack, sequences, onImport }) {
       onImport(parsed);
       setImportStatus('success');
       setImportData('');
-      
+
       setTimeout(() => {
         setImportStatus(null);
         onBack(); // Go back after successful import
       }, 2000);
-      
+
     } catch (err) {
       console.error(err);
       setImportStatus('error');
       setTimeout(() => setImportStatus(null), 3000);
+    }
+  };
+
+  const handleRestoreDefaults = () => {
+    if (confirm('Obnovit výchozí sekvence z kódu? Tím se zahodí případný lokální import na tomto zařízení.')) {
+      onRestoreDefaults();
+      onBack();
     }
   };
 
@@ -64,7 +71,7 @@ function SavedSequencesBackupScreen({ onBack, sequences, onImport }) {
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden mb-8">
           <div className="bg-indigo-600 px-8 py-6 text-white text-center">
             <h3 className="text-3xl font-bold mb-2">Export dat</h3>
-            <p className="text-indigo-200">Kopírujte text níže a přeneste jej do jiného zařízení</p>
+            <p className="text-indigo-200">Kopírujte text níže a uložte si jej jako zálohu</p>
           </div>
 
           <div className="p-8">
@@ -72,23 +79,23 @@ function SavedSequencesBackupScreen({ onBack, sequences, onImport }) {
               <label className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
                 Vaše data pro zálohu ({sequences?.length || 0} sekvencí)
               </label>
-              
+
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 relative">
                 <textarea
                   readOnly
                   value={exportString}
-                  rows="4"
+                  rows="6"
                   className="w-full bg-transparent resize-none text-sm font-mono text-gray-600 focus:outline-none"
                   onClick={(e) => e.target.select()}
                 />
               </div>
-              
+
               <div className="mt-6 flex justify-center">
                 <button
                   onClick={handleCopy}
                   className={`flex items-center px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-md ${
-                    copied 
-                      ? 'bg-success-500 hover:bg-success-600 text-white' 
+                    copied
+                      ? 'bg-success-500 hover:bg-success-600 text-white'
                       : 'bg-indigo-600 hover:bg-indigo-700 text-white'
                   }`}
                 >
@@ -109,10 +116,10 @@ function SavedSequencesBackupScreen({ onBack, sequences, onImport }) {
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-2xl overflow-hidden mb-8">
           <div className="bg-purple-600 px-8 py-6 text-white text-center">
             <h3 className="text-3xl font-bold mb-2">Import dat</h3>
-            <p className="text-purple-200">Vložte zkopírovaný kód z jiného zařízení</p>
+            <p className="text-purple-200">Vložte zkopírovaný kód ze zálohy</p>
           </div>
 
           <div className="p-8">
@@ -127,7 +134,7 @@ function SavedSequencesBackupScreen({ onBack, sequences, onImport }) {
               <label htmlFor="import-data" className="block text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
                 Vložte záložní text (JSON kód)
               </label>
-              
+
               <textarea
                 id="import-data"
                 value={importData}
@@ -137,7 +144,7 @@ function SavedSequencesBackupScreen({ onBack, sequences, onImport }) {
                 className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors font-mono text-sm"
               />
             </div>
-            
+
             {importStatus === 'error' && (
               <div className="mb-6 text-center text-danger-600 font-semibold bg-danger-50 p-3 rounded-lg">
                 Neplatný formát dat! Zkontrolujte, zda jste zkopírovali celý text.
@@ -150,7 +157,7 @@ function SavedSequencesBackupScreen({ onBack, sequences, onImport }) {
                 Úspěšně importováno, přesměrovávám...
               </div>
             )}
-            
+
             <div className="flex justify-center">
               <button
                 onClick={handleImport}
@@ -162,6 +169,20 @@ function SavedSequencesBackupScreen({ onBack, sequences, onImport }) {
               </button>
             </div>
           </div>
+        </div>
+
+        {/* Restore defaults from code */}
+        <div className="bg-white/10 border border-white/20 rounded-2xl p-6 text-center">
+          <p className="text-indigo-100 mb-4 text-sm">
+            Chcete se vrátit k výchozím sekvencím definovaným v aplikaci?
+          </p>
+          <button
+            onClick={handleRestoreDefaults}
+            className="inline-flex items-center bg-white/15 hover:bg-white/25 text-white px-6 py-3 rounded-xl font-semibold transition-colors border border-white/30"
+          >
+            <RotateCcw className="w-5 h-5 mr-2" />
+            Obnovit výchozí (z kódu)
+          </button>
         </div>
 
       </div>

@@ -42,19 +42,19 @@ export const DEFAULT_VELKY = {
   40: { person: "Hitler", action: "nechává vyvraždit", object: "židy" },
   41: { person: "Drákula", action: "saje z krku", object: "krev" },
   42: { person: "Počítač lidstva", action: "počítá", object: "číslo" },
-  43: { person: "Pepek námořník", action: "jí lžící", object: "špenát" },
+  43: { person: "Pepek námořník", action: "jí špenát", object: "lžící" },
   44: { person: "Indiana Jones", action: "bičuje", object: "bičem" },
   45: { person: "Voják", action: "zdvihá", object: "prapor" },
   46: { person: "Samuraj", action: "páchá harakiri", object: "katanou" },
   47: { person: "Zlatokop", action: "doluje", object: "zlaté valouny" },
-  48: { person: "Cimrman", action: "vynalézá", object: "dynamit" },
+  48: { person: "Cimrman", action: "telefonuje", object: "telefonem" },
   49: { person: "Tomáš Baťa", action: "šije", object: "boty" },
   50: { person: "Táta", action: "spí v", object: "křesle" },
   51: { person: "Žeryk", action: "ohryzává", object: "kost" },
   52: { person: "Santa Klaus", action: "dává pod stromeček", object: "dárky" },
   53: { person: "Máma", action: "smaží", object: "řízek" },
   54: { person: "Babička", action: "peče", object: "cukroví" },
-  55: { person: "Sherlock Holmes", action: "hraje smyčcem na", object: "housle" },
+  55: { person: "Sherlock Holmes", action: "hraje na housle", object: "šmytcem" },
   56: { person: "Robocop", action: "zatýká do", object: "vězení" },
   57: { person: "Voskovec a Werich", action: "zkoumají", object: "granát" },
   58: { person: "Jackie Chan", action: "padá do", object: "markýzy" },
@@ -142,10 +142,44 @@ export const MODES = {
     { mode: 'pao-seq', title: 'PAO → Sekvence', description: 'PAO → binární sekvence 18 čísel' },
     { mode: 'seq-word', title: 'Sekvence → Slovo', description: 'Binární sekvence 6 čísel → slovo' },
     { mode: 'word-seq', title: 'Slovo → Sekvence', description: 'Slovo → binární sekvence 6 čísel' },
-    { mode: 'text-utf8', title: 'Text → UTF-8 Binární', description: 'Převod textu na binární kód podle UTF-8' },
-    { mode: 'saved-binary', title: 'Uložené binární kódy', description: 'Správa uložených textových převodů' }
+    { mode: 'text-utf8', title: 'Text → UTF-8 Binární', description: 'Převod textu na binární kód podle UTF-8' }
   ]
 };
+
+// Pevně dané sekvence k procvičování (dříve „Uložené sekvence").
+// Úpravy se provádějí přímo zde v kódu.
+export const SAVED_SEQUENCES = [
+  {
+    id: "1773780991157",
+    name: "Rodné číslo Vojta",
+    value: "0809251146",
+    pao: "Tarzan páchá harakiri"
+  },
+  {
+    id: "1773781026004",
+    name: "Rodné číslo Viki",
+    value: "1206250430",
+    pao: "Thor masíruje"
+  },
+  {
+    id: "1773781079253",
+    name: "Cel telefon",
+    value: "776 619 077",
+    pao: "Brácha mlátí golfovou holí Belmonda co se opíjí foglarovkou"
+  },
+  {
+    id: "1773781113769",
+    name: "IČ",
+    value: "01464272",
+    pao: "Superman páchá harakiri číslem na tanku"
+  },
+  {
+    id: "1773781150743",
+    name: "PÍ na 40 míst",
+    value: "3,14 15 92 65 35 89 79 32 38 46 26 43 38 32 79 50 28 84 19 71",
+    pao: "Vezmu LŽÍCI a LUK, zapíšu do DENÍKu že jdu na lov BÝKů. Ti se schovávají v poli kde je MÁK. Stoupnu si na SUD, který se změní v TRDELNÍK. A zírám jak okolo jde MNICH a na rukou drží MÁSLO na kterém sedí ŽÁBA.\n\nChodidlo mi prostřelí NÁBOJ\nDo kolene se zakousne ZMIJE\nZadek zasedne MYŠ\nPupek mi olízne MNICH\nNa prsa nasadím TRDELNÍKY\nNa ramenou sedí KOČKA\nÚsta cucají NOS\nNa nose mám SAZE\nV očích mám LED\nVlasy mi mastí TLUSŤOCH"
+  }
+];
 
 export const DEFAULT_BINARNI = {
   "000": 0,
@@ -194,7 +228,7 @@ export const KARTY_SYSTEM = {
   "K♠": { number: 33, person: "Lisa", action: "se učí ze", object: "sešitu" },
   "A♣": { number: 41, person: "Drákula", action: "saje z krku", object: "krev" },
   "2♣": { number: 42, person: "Počítač lidstva", action: "počítá", object: "číslo" },
-  "3♣": { number: 43, person: "Pepek námořník", action: "jí lžící", object: "špenát" },
+  "3♣": { number: 43, person: "Pepek námořník", action: "jí špenát", object: "lžící" },
   "4♣": { number: 44, person: "Indiana Jones", action: "bičuje", object: "bičem" },
   "5♣": { number: 45, person: "Voják", action: "zdvihá", object: "prapor" },
   "6♣": { number: 46, person: "Samuraj", action: "páchá harakiri", object: "katanou" },
