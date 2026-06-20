@@ -77,15 +77,15 @@ function TrainingScreen({
                 </h3>
               </div>
 
-              <div className="flex-grow flex flex-col items-center justify-center p-12">
+              <div className="flex-grow flex flex-col items-center justify-center p-6 sm:p-10">
                 <div className="text-center">
-                  <p className="text-gray-400 text-sm uppercase tracking-wider font-semibold mb-4">Otázka</p>
-                  <div className="text-6xl font-bold text-gray-800 leading-tight">
+                  <p className="text-gray-400 text-sm uppercase tracking-wider font-semibold mb-3 sm:mb-4">Otázka</p>
+                  <div className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-800 leading-tight break-words">
                     {question?.question}
                   </div>
                 </div>
 
-                <div className={`mt-12 text-primary-500 animate-bounce transition-opacity duration-300 ${showAnswer ? 'opacity-0' : 'opacity-100'}`}>
+                <div className={`mt-6 sm:mt-10 text-primary-500 animate-bounce transition-opacity duration-300 ${showAnswer ? 'opacity-0' : 'opacity-100'}`}>
                   Klikni pro otočení
                 </div>
               </div>
@@ -98,9 +98,9 @@ function TrainingScreen({
                   <h3 className="text-xl font-bold text-center">Odpověď</h3>
                 </div>
 
-                <div className="flex-grow flex flex-col items-center justify-center p-8">
-                  <div className="text-center mb-8">
-                    <div className="text-5xl font-bold text-gray-800 mb-2">
+                <div className="flex-grow flex flex-col items-center justify-center p-6 sm:p-8">
+                  <div className="text-center mb-6 sm:mb-8">
+                    <div className="text-4xl sm:text-5xl font-bold text-gray-800 mb-2 break-words">
                       {question?.answer}
                     </div>
                     {question?.paoSequence && (
