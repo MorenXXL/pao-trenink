@@ -112,35 +112,35 @@ function BinarySequenceScreen({
               </div>
             )}
 
-            {/* Answer display */}
-            <div className="bg-gray-50 border-2 border-gray-200 rounded-2xl py-5 px-4 mb-5 min-h-[70px] flex items-center justify-center">
+            {/* Answer display — fixed height so the block never shifts while typing */}
+            <div className="bg-gray-50 border-2 border-gray-200 rounded-2xl px-3 mb-5 h-24 flex items-center justify-center overflow-hidden">
               {binaryInput
-                ? <span className="text-3xl font-mono tracking-widest text-gray-900">{formatBinary(binaryInput)}</span>
+                ? <span className="text-2xl sm:text-3xl font-mono tracking-wider text-gray-900 break-all text-center leading-snug">{formatBinary(binaryInput)}</span>
                 : <span className="text-gray-400 text-lg">Zadejte binární kód…</span>}
             </div>
 
             {!showResult ? (
-              <>
+              <div className="space-y-3 select-none">
                 {/* 0 / 1 keypad */}
-                <div className="grid grid-cols-2 gap-4 mb-3">
+                <div className="grid grid-cols-2 gap-4">
                   <button
                     onClick={() => setBinaryInput(prev => prev + '0')}
-                    className="h-20 bg-gray-700 hover:bg-gray-800 text-white text-4xl font-bold rounded-2xl transition-colors shadow-lg active:scale-95"
+                    className="h-20 bg-gray-700 hover:bg-gray-800 active:bg-gray-900 text-white text-4xl font-bold rounded-2xl transition-colors shadow-lg touch-manipulation"
                   >
                     0
                   </button>
                   <button
                     onClick={() => setBinaryInput(prev => prev + '1')}
-                    className="h-20 bg-primary-600 hover:bg-primary-700 text-white text-4xl font-bold rounded-2xl transition-colors shadow-lg active:scale-95"
+                    className="h-20 bg-primary-600 hover:bg-primary-700 active:bg-primary-800 text-white text-4xl font-bold rounded-2xl transition-colors shadow-lg touch-manipulation"
                   >
                     1
                   </button>
                 </div>
-                <div className="flex gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   <button
                     onClick={() => setBinaryInput(prev => prev.slice(0, -1))}
                     disabled={binaryInput.length === 0}
-                    className="flex items-center justify-center bg-warning-500 hover:bg-warning-600 disabled:bg-gray-300 text-white px-5 py-3 rounded-xl font-semibold transition-colors"
+                    className="flex items-center justify-center bg-warning-500 hover:bg-warning-600 active:bg-warning-700 disabled:bg-gray-300 text-white px-4 py-3 rounded-xl font-semibold transition-colors touch-manipulation"
                   >
                     <Delete className="w-5 h-5 mr-2" />
                     Smazat
@@ -148,20 +148,20 @@ function BinarySequenceScreen({
                   <button
                     onClick={() => setBinaryInput('')}
                     disabled={binaryInput.length === 0}
-                    className="bg-gray-400 hover:bg-gray-500 disabled:bg-gray-200 text-white px-5 py-3 rounded-xl font-semibold transition-colors"
+                    className="bg-gray-400 hover:bg-gray-500 active:bg-gray-600 disabled:bg-gray-200 text-white px-4 py-3 rounded-xl font-semibold transition-colors touch-manipulation"
                   >
                     Vymazat vše
                   </button>
-                  <button
-                    onClick={handleSubmit}
-                    disabled={binaryInput.length === 0}
-                    className="flex-1 flex items-center justify-center bg-success-600 hover:bg-success-700 disabled:bg-gray-300 text-white px-5 py-3 rounded-xl font-bold transition-colors shadow-lg"
-                  >
-                    <CheckCircle className="w-5 h-5 mr-2" />
-                    Zkontrolovat
-                  </button>
                 </div>
-              </>
+                <button
+                  onClick={handleSubmit}
+                  disabled={binaryInput.length === 0}
+                  className="w-full flex items-center justify-center bg-success-600 hover:bg-success-700 active:bg-success-800 disabled:bg-gray-300 text-white px-5 py-4 rounded-xl text-lg font-bold transition-colors shadow-lg touch-manipulation"
+                >
+                  <CheckCircle className="w-5 h-5 mr-2" />
+                  Zkontrolovat
+                </button>
+              </div>
             ) : (
               /* Wrong result */
               <div className="text-center">
