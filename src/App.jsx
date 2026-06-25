@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import MenuScreen from './components/MenuScreen';
 import { generateQuestion } from './utils/questionGenerator';
 import { DEFAULT_VELKY, DEFAULT_MALY, DEFAULT_BINARNI, SAVED_SEQUENCES } from './data/constants';
+import { pickUntrainedThisWeek } from './utils/stats';
 
 // Lazy load screens
 const ModeScreen = lazy(() => import('./components/ModeScreen'));
@@ -15,6 +16,7 @@ const SavedSequenceTrainingScreen = lazy(() => import('./components/SavedSequenc
 const SavedSequencesBackupScreen = lazy(() => import('./components/SavedSequencesBackupScreen'));
 const ShowSystemScreen = lazy(() => import('./components/ShowSystemScreen'));
 const StatisticsScreen = lazy(() => import('./components/StatisticsScreen'));
+const PracticeLaunchScreen = lazy(() => import('./components/PracticeLaunchScreen'));
 
 // Fixed reference data — defined in code, no editing/storage at runtime.
 const data = { velky: DEFAULT_VELKY, maly: DEFAULT_MALY, binarni: DEFAULT_BINARNI };
@@ -57,6 +59,7 @@ function App() {
   const [currentRecallTime, setCurrentRecallTime] = useState(null);
 
   const [trainingSequenceIndex, setTrainingSequenceIndex] = useState(0);
+  const [practicePick, setPracticePick] = useState(null);
 
   // Sequences: seeded from code (SAVED_SEQUENCES), optionally overridden by a
   // local import (persisted to localStorage on this device). No cloud sync.
@@ -97,7 +100,9 @@ function App() {
     }
   };
 
-  const selectMode = (mode) => {
+  // Spustí konkrétní cvičení (systém + režim) – použité jak z menu, tak z „CVIČIT".
+  const startExercise = (system, mode) => {
+    setCurrentSystem(system);
     setCurrentMode(mode);
     setSessionStats({
       score: 0,
@@ -119,16 +124,18 @@ function App() {
     setCurrentRecallTime(null);
 
     // For special modes, use appropriate screens
-    if (currentSystem === 'karty' && mode === 'pao-cards') {
+    if (system === 'karty' && mode === 'pao-cards') {
       setScreen('card-selection');
-    } else if (currentSystem === 'binarni' && mode === 'text-utf8') {
+    } else if (system === 'binarni' && mode === 'text-utf8') {
       setScreen('text-converter');
-    } else if (currentSystem === 'binarni' && ['seq-pao', 'pao-seq', 'seq-word', 'word-seq'].includes(mode)) {
+    } else if (system === 'binarni' && ['seq-pao', 'pao-seq', 'seq-word', 'word-seq'].includes(mode)) {
       setScreen('binary-sequence');
     } else {
       setScreen('training');
     }
   };
+
+  const selectMode = (mode) => startExercise(currentSystem, mode);
 
   // `overrides` lets callers pass the freshly computed answeredCount / reviewQueue,
   // because state updates from setState are not yet visible inside this same tick.
@@ -285,6 +292,11 @@ function App() {
     setScreen('show-system');
   };
 
+  const handlePractice = () => {
+    setPracticePick(pickUntrainedThisWeek());
+    setScreen('practice-launch');
+  };
+
   const handleResetRecords = (systemId) => {
     if (window.confirm('Opravdu chcete smazat všechny časové rekordy a statistiky pro tento systém?')) {
       Object.keys(localStorage).forEach(key => {
@@ -312,11 +324,20 @@ function App() {
             onResetRecords={handleResetRecords}
             onShowSystem={showSystem}
             onShowStats={() => setScreen('statistics')}
+            onPractice={handlePractice}
           />
         )}
 
         {screen === 'statistics' && (
           <StatisticsScreen onBack={backToMenu} />
+        )}
+
+        {screen === 'practice-launch' && (
+          <PracticeLaunchScreen
+            pick={practicePick}
+            onStart={startExercise}
+            onBack={backToMenu}
+          />
         )}
 
         {screen === 'show-system' && currentSystem && (

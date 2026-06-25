@@ -111,3 +111,23 @@ export function clearStats(system) {
     if (key.startsWith(`stats_${system}_`)) localStorage.removeItem(key);
   });
 }
+
+// Vybere náhodné cvičení, které tento týden ještě neproběhlo.
+// Vrací { system, systemTitle, mode, modeTitle } nebo null, pokud je vše procvičeno.
+export function pickUntrainedThisWeek() {
+  const candidates = [];
+  for (const group of getExerciseGroups()) {
+    for (const m of group.modes) {
+      if (summarizeExercise(group.system, m.mode).thisWeekCount === 0) {
+        candidates.push({
+          system: group.system,
+          systemTitle: group.title,
+          mode: m.mode,
+          modeTitle: m.title
+        });
+      }
+    }
+  }
+  if (!candidates.length) return null;
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
