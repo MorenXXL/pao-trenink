@@ -14,6 +14,7 @@ const SavedSequencesListScreen = lazy(() => import('./components/SavedSequencesL
 const SavedSequenceTrainingScreen = lazy(() => import('./components/SavedSequenceTrainingScreen'));
 const SavedSequencesBackupScreen = lazy(() => import('./components/SavedSequencesBackupScreen'));
 const ShowSystemScreen = lazy(() => import('./components/ShowSystemScreen'));
+const StatisticsScreen = lazy(() => import('./components/StatisticsScreen'));
 
 // Fixed reference data — defined in code, no editing/storage at runtime.
 const data = { velky: DEFAULT_VELKY, maly: DEFAULT_MALY, binarni: DEFAULT_BINARNI };
@@ -285,13 +286,13 @@ function App() {
   };
 
   const handleResetRecords = (systemId) => {
-    if (window.confirm('Opravdu chcete smazat všechny časové rekordy pro tento systém?')) {
+    if (window.confirm('Opravdu chcete smazat všechny časové rekordy a statistiky pro tento systém?')) {
       Object.keys(localStorage).forEach(key => {
-        if (key.startsWith(`record_${systemId}_`)) {
+        if (key.startsWith(`record_${systemId}_`) || key.startsWith(`stats_${systemId}_`)) {
           localStorage.removeItem(key);
         }
       });
-      alert('Rekordy pro tento systém byly úspěšně smazány.');
+      alert('Rekordy a statistiky pro tento systém byly úspěšně smazány.');
     }
   };
 
@@ -310,7 +311,12 @@ function App() {
             onSelectSystem={selectSystem}
             onResetRecords={handleResetRecords}
             onShowSystem={showSystem}
+            onShowStats={() => setScreen('statistics')}
           />
+        )}
+
+        {screen === 'statistics' && (
+          <StatisticsScreen onBack={backToMenu} />
         )}
 
         {screen === 'show-system' && currentSystem && (

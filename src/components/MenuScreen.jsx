@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Brain, Layers, Binary, Spade, Settings, TimerReset, Table2 } from 'lucide-react';
-function MenuScreen({ onSelectSystem, onResetRecords, onShowSystem }) {
+import { Brain, Layers, Binary, Spade, Settings, TimerReset, Table2, BarChart3 } from 'lucide-react';
+function MenuScreen({ onSelectSystem, onResetRecords, onShowSystem, onShowStats }) {
   const [activeMenu, setActiveMenu] = useState(null);
   const systems = [
     {
@@ -57,9 +57,16 @@ function MenuScreen({ onSelectSystem, onResetRecords, onShowSystem }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-500 via-primary-600 to-purple-700 p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <h1 className="text-5xl font-bold text-white mb-4">PAO Trénink</h1>
-          <p className="text-xl text-primary-100">Moderní trénink paměti pro lepší zapamatování</p>
+          <p className="text-xl text-primary-100 mb-6">Moderní trénink paměti pro lepší zapamatování</p>
+          <button
+            onClick={onShowStats}
+            className="inline-flex items-center bg-white/15 hover:bg-white/25 text-white px-6 py-3 rounded-xl font-semibold transition-colors border border-white/30 shadow-sm"
+          >
+            <BarChart3 className="w-5 h-5 mr-2" />
+            Statistiky
+          </button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

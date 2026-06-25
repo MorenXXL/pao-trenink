@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Trophy, Home, RotateCcw, Zap, Target, Clock, Timer, History } from 'lucide-react';
+import { recordSession } from '../utils/stats';
 
 function SummaryScreen({ stats, system, mode, onHome, onRestart }) {
     const accuracy = Math.round((stats.correct / (stats.correct + stats.wrong)) * 100) || 0;
@@ -9,6 +10,18 @@ function SummaryScreen({ stats, system, mode, onHome, onRestart }) {
 
     const [historicalRecord, setHistoricalRecord] = useState(0);
     const [isNewRecord, setIsNewRecord] = useState(false);
+
+    // Zaznamenej toto sezení do statistik (jen jednou, i pod StrictMode).
+    const recordedRef = useRef(false);
+    useEffect(() => {
+        if (recordedRef.current || !system || !mode) return;
+        recordedRef.current = true;
+        recordSession(system, mode, {
+            n: stats.trainingCorrect || 0,
+            best: stats.fastestTime === Infinity ? null : stats.fastestTime,
+            avg: stats.trainingCorrect > 0 ? stats.totalCorrectTime / stats.trainingCorrect : null
+        });
+    }, []);
 
     useEffect(() => {
         if (!system || !mode) return;
