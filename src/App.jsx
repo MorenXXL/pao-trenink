@@ -2,7 +2,7 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import MenuScreen from './components/MenuScreen';
 import { generateQuestion } from './utils/questionGenerator';
 import { DEFAULT_VELKY, DEFAULT_MALY, DEFAULT_BINARNI, SAVED_SEQUENCES } from './data/constants';
-import { pickUntrainedThisWeek } from './utils/stats';
+import { pickPracticeExercise } from './utils/stats';
 
 // Lazy load screens
 const ModeScreen = lazy(() => import('./components/ModeScreen'));
@@ -293,8 +293,12 @@ function App() {
   };
 
   const handlePractice = () => {
-    setPracticePick(pickUntrainedThisWeek());
+    setPracticePick(pickPracticeExercise());
     setScreen('practice-launch');
+  };
+
+  const repickPractice = () => {
+    setPracticePick(prev => pickPracticeExercise(prev?.key));
   };
 
   const handleResetRecords = (systemId) => {
@@ -336,6 +340,7 @@ function App() {
           <PracticeLaunchScreen
             pick={practicePick}
             onStart={startExercise}
+            onAnother={repickPractice}
             onBack={backToMenu}
           />
         )}

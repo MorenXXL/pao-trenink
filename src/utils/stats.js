@@ -73,6 +73,7 @@ export function summarizeExercise(system, mode, now = Date.now()) {
       const age = now - s.t;
       return age > loAgeExcl && age <= hiAgeIncl;
     });
+  const lastWeekCount = inWindow(WEEK, 2 * WEEK).length;
   const avgThis = weightedAvg(inWindow(-1, WEEK));
   const avgLast = weightedAvg(inWindow(WEEK, 2 * WEEK));
 
@@ -92,7 +93,7 @@ export function summarizeExercise(system, mode, now = Date.now()) {
     trend = { tone: 'idle', text: 'Tento týden jsi to necvičil – zkus to oprášit.' };
   }
 
-  return { best, avg, timesTrained, thisWeekCount, trend, hasData: timesTrained > 0 };
+  return { best, avg, timesTrained, thisWeekCount, lastWeekCount, trend, hasData: timesTrained > 0 };
 }
 
 // Skupiny cvičení (systém + jeho měřené režimy) pro výpis statistik.
@@ -113,21 +114,48 @@ export function clearStats(system) {
 }
 
 // Vybere náhodné cvičení, které tento týden ještě neproběhlo.
-// Vrací { system, systemTitle, mode, modeTitle } nebo null, pokud je vše procvičeno.
-export function pickUntrainedThisWeek() {
-  const candidates = [];
+// Přednost mají cvičení nestihnutá minulý týden a ta, kde se výsledek zhoršil.
+// `excludeKey` umožní „Vyber jiné" – vyloučí aktuálně nabízené, pokud to jde.
+// Vrací { system, systemTitle, mode, modeTitle, key, reason } nebo null (vše procvičeno).
+// Zhoršení: poslední odtrénované sezení bylo o ≥0,3 s pomalejší než to předchozí.
+// (Týdenní trend tu nelze použít – v nabídce jsou cvičení bez dat za tento týden.)
+function isRecentlyWorse(system, mode) {
+  const timed = getSessions(system, mode).filter(s => s.n > 0 && typeof s.avg === 'number' && s.avg > 0);
+  if (timed.length < 2) return false;
+  return timed[timed.length - 1].avg - timed[timed.length - 2].avg >= 0.3;
+}
+
+export function pickPracticeExercise(excludeKey = null) {
+  const pool = [];
   for (const group of getExerciseGroups()) {
     for (const m of group.modes) {
-      if (summarizeExercise(group.system, m.mode).thisWeekCount === 0) {
-        candidates.push({
-          system: group.system,
-          systemTitle: group.title,
-          mode: m.mode,
-          modeTitle: m.title
-        });
-      }
+      const s = summarizeExercise(group.system, m.mode);
+      if (s.thisWeekCount !== 0) continue;
+      const worsened = isRecentlyWorse(group.system, m.mode);
+      const carriedOver = s.lastWeekCount === 0;
+      pool.push({
+        system: group.system,
+        systemTitle: group.title,
+        mode: m.mode,
+        modeTitle: m.title,
+        key: `${group.system}_${m.mode}`,
+        priority: worsened || carriedOver,
+        reason: worsened
+          ? 'Naposledy ses zhoršil – zkus to vylepšit.'
+          : (carriedOver && s.hasData ? 'Nestihnuto z minulého týdne.' : null)
+      });
     }
   }
-  if (!candidates.length) return null;
-  return candidates[Math.floor(Math.random() * candidates.length)];
+  if (!pool.length) return null;
+
+  // Pro „Vyber jiné" vynech aktuální, pokud zůstane z čeho vybírat.
+  let candidates = pool;
+  if (excludeKey && pool.some(p => p.key !== excludeKey)) {
+    candidates = pool.filter(p => p.key !== excludeKey);
+  }
+
+  // Přednostní (nestihnuté minulý týden / zhoršené) mají při losování přednost.
+  const priority = candidates.filter(p => p.priority);
+  const chosen = priority.length ? priority : candidates;
+  return chosen[Math.floor(Math.random() * chosen.length)];
 }
