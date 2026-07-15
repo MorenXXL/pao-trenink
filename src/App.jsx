@@ -381,6 +381,7 @@ function App() {
             mode={currentMode}
             onHome={backToMenu}
             onRestart={() => selectMode(currentMode)}
+            onPractice={handlePractice}
           />
         )}
 

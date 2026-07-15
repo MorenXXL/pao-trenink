@@ -3,8 +3,16 @@
 
 import { MODES } from '../data/constants';
 
-const WEEK = 7 * 24 * 60 * 60 * 1000;
 const MAX_HISTORY = 500;
+
+// Pondělí 00:00 místního času pro daný okamžik (kalendářní týden Po–Ne).
+function startOfWeek(ms) {
+  const d = new Date(ms);
+  d.setHours(0, 0, 0, 0);
+  const dow = (d.getDay() + 6) % 7; // Po=0 … Ne=6
+  d.setDate(d.getDate() - dow);
+  return d.getTime();
+}
 
 export const SYSTEM_TITLES = {
   velky: 'Velký systém (PAO)',
@@ -66,16 +74,16 @@ export function summarizeExercise(system, mode, now = Date.now()) {
   const best = timed.length ? Math.min(...timed.map(s => s.best)) : null;
   const avg = weightedAvg(sessions);
   const timesTrained = sessions.length;
-  const thisWeekCount = sessions.filter(s => now - s.t <= WEEK).length;
 
-  const inWindow = (loAgeExcl, hiAgeIncl) =>
-    sessions.filter(s => {
-      const age = now - s.t;
-      return age > loAgeExcl && age <= hiAgeIncl;
-    });
-  const lastWeekCount = inWindow(WEEK, 2 * WEEK).length;
-  const avgThis = weightedAvg(inWindow(-1, WEEK));
-  const avgLast = weightedAvg(inWindow(WEEK, 2 * WEEK));
+  // Kalendářní týdny Po–Ne (reset v pondělí 00:00).
+  const thisWeekStart = startOfWeek(now);
+  const lastWeekStart = startOfWeek(thisWeekStart - 1);
+  const inRange = (lo, hi) => sessions.filter(s => s.t >= lo && (hi == null || s.t < hi));
+
+  const thisWeekCount = inRange(thisWeekStart, null).length;
+  const lastWeekCount = inRange(lastWeekStart, thisWeekStart).length;
+  const avgThis = weightedAvg(inRange(thisWeekStart, null));
+  const avgLast = weightedAvg(inRange(lastWeekStart, thisWeekStart));
 
   let trend = null;
   if (avgThis != null && avgLast != null) {

@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Trophy, Home, RotateCcw, Zap, Target, Clock, Timer, History } from 'lucide-react';
+import { Trophy, Home, RotateCcw, Zap, Target, Clock, Timer, History, Dumbbell } from 'lucide-react';
 import { recordSession } from '../utils/stats';
 
-function SummaryScreen({ stats, system, mode, onHome, onRestart }) {
+function SummaryScreen({ stats, system, mode, onHome, onRestart, onPractice }) {
     const accuracy = Math.round((stats.correct / (stats.correct + stats.wrong)) * 100) || 0;
 
     const validFastestTime = stats.fastestTime === Infinity ? 0 : stats.fastestTime;
@@ -131,20 +131,30 @@ function SummaryScreen({ stats, system, mode, onHome, onRestart }) {
 
                 <div className="space-y-4">
                     <button
-                        onClick={onRestart}
-                        className="w-full flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white px-8 py-4 rounded-xl text-lg font-bold transition-colors shadow-lg"
+                        onClick={onPractice}
+                        className="w-full flex items-center justify-center bg-primary-600 hover:bg-primary-700 text-white px-8 py-5 rounded-2xl text-2xl font-extrabold transition-colors shadow-xl"
                     >
-                        <RotateCcw className="w-6 h-6 mr-2" />
-                        Trénovat znovu
+                        <Dumbbell className="w-7 h-7 mr-3" />
+                        Cvičit dále
                     </button>
 
-                    <button
-                        onClick={onHome}
-                        className="w-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 px-8 py-4 rounded-xl text-lg font-bold transition-colors"
-                    >
-                        <Home className="w-6 h-6 mr-2" />
-                        Zpět do menu
-                    </button>
+                    <div className="grid grid-cols-2 gap-4">
+                        <button
+                            onClick={onRestart}
+                            className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-4 rounded-xl font-bold transition-colors"
+                        >
+                            <RotateCcw className="w-5 h-5 mr-2" />
+                            Trénovat znovu
+                        </button>
+
+                        <button
+                            onClick={onHome}
+                            className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 px-6 py-4 rounded-xl font-bold transition-colors"
+                        >
+                            <Home className="w-5 h-5 mr-2" />
+                            Zpět do menu
+                        </button>
+                    </div>
                 </div>
 
             </div>
