@@ -407,6 +407,7 @@ function App() {
             onBack={backToModes}
             onCorrect={handleCorrect}
             onWrong={handleWrong}
+            data={data}
           />
         )}
 

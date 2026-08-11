@@ -22,7 +22,8 @@ function BinarySequenceScreen({
   onCorrect,
   onWrong,
   mode,
-  onShowAnswer
+  onShowAnswer,
+  data
 }) {
   const [binaryInput, setBinaryInput] = useState('');
   const [showResult, setShowResult] = useState(false);
@@ -59,6 +60,35 @@ function BinarySequenceScreen({
   const handleNextAfterWrong = () => {
     onWrong();
     handleReset();
+  };
+
+  const fmtNum = (n) => (n == null ? '?' : String(n).padStart(2, '0'));
+
+  // Rozdělí správnou i zadanou odpověď na dvojice trojic (= jedno PAO číslo)
+  // a spočítá zadané i správné číslo pro tabulku porovnání.
+  const buildComparison = () => {
+    const correctTriples = (question.answer.match(/.{1,3}/g)) || [];
+    const userTriples = (binaryInput.match(/.{1,3}/g)) || [];
+    const digit = (t) =>
+      t && data && data.binarni && data.binarni[t] !== undefined ? data.binarni[t] : null;
+    const numOf = (a, b) => {
+      const x = digit(a);
+      const y = digit(b);
+      return x == null || y == null ? null : x * 10 + y;
+    };
+    const pairs = [];
+    for (let i = 0; i < correctTriples.length; i += 2) {
+      const c = [correctTriples[i], correctTriples[i + 1]];
+      const u = [userTriples[i], userTriples[i + 1]];
+      pairs.push({
+        c,
+        u,
+        correctNum: numOf(c[0], c[1]),
+        userNum: numOf(u[0], u[1]),
+        ok: c[0] === u[0] && c[1] === u[1]
+      });
+    }
+    return pairs;
   };
 
   return (
@@ -113,11 +143,13 @@ function BinarySequenceScreen({
             )}
 
             {/* Answer display — fixed height so the block never shifts while typing */}
-            <div className="bg-gray-50 border-2 border-gray-200 rounded-2xl px-3 mb-5 h-24 flex items-center justify-center overflow-hidden">
-              {binaryInput
-                ? <span className="text-2xl sm:text-3xl font-mono tracking-wider text-gray-900 break-all text-center leading-snug">{formatBinary(binaryInput)}</span>
-                : <span className="text-gray-400 text-lg">Zadejte binární kód…</span>}
-            </div>
+            {!showResult && (
+              <div className="bg-gray-50 border-2 border-gray-200 rounded-2xl px-3 mb-5 h-24 flex items-center justify-center overflow-hidden">
+                {binaryInput
+                  ? <span className="text-2xl sm:text-3xl font-mono tracking-wider text-gray-900 break-all text-center leading-snug">{formatBinary(binaryInput)}</span>
+                  : <span className="text-gray-400 text-lg">Zadejte binární kód…</span>}
+              </div>
+            )}
 
             {!showResult ? (
               <div className="space-y-3 select-none">
@@ -163,29 +195,62 @@ function BinarySequenceScreen({
                 </button>
               </div>
             ) : (
-              /* Wrong result */
-              <div className="text-center">
-                <div className="text-2xl font-bold text-danger-700 mb-3">Špatně</div>
-                <div className="space-y-1 mb-5">
-                  <div className="text-gray-500">
-                    Vaše odpověď: <span className="font-mono font-semibold text-gray-700">{formatBinary(binaryInput)}</span>
-                  </div>
-                  <div className="text-gray-500">
-                    Správně: <span className="font-mono font-bold text-success-700">{formatBinary(question.answer)}</span>
-                  </div>
-                  {mode === 'pao-seq' && question.paoNumbers && (
-                    <div className="text-gray-500">
-                      PAO čísla: <span className="font-semibold text-gray-700">{question.paoNumbers}</span>
+              /* Wrong result — porovnání po dvojčíslích se zvýrazněnou chybnou trojicí */
+              <div>
+                <div className="text-2xl font-bold text-danger-700 mb-4 text-center">Špatně</div>
+
+                <div className="space-y-2 mb-5">
+                  {buildComparison().map((p, i) => (
+                    <div
+                      key={i}
+                      className={`rounded-xl border p-3 ${p.ok ? 'bg-success-50 border-success-200' : 'bg-danger-50 border-danger-200'}`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-bold uppercase tracking-wide text-gray-500">{i + 1}. číslo</span>
+                        {p.ok ? (
+                          <span className="text-sm font-bold text-success-700">{fmtNum(p.correctNum)} ✓</span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-sm font-bold">
+                            <span className="text-danger-700">{fmtNum(p.userNum)}</span>
+                            <ArrowRight className="w-4 h-4 text-gray-400" />
+                            <span className="text-success-700">{fmtNum(p.correctNum)}</span>
+                          </span>
+                        )}
+                      </div>
+
+                      <div
+                        className="grid gap-x-2 gap-y-1 justify-center items-center font-mono text-xl"
+                        style={{ gridTemplateColumns: `auto repeat(${p.c.length}, minmax(2.75rem, auto))` }}
+                      >
+                        <div className="text-[10px] uppercase text-gray-400 font-sans font-semibold text-right pr-1">Správně</div>
+                        {p.c.map((c, j) => {
+                          const bad = p.u[j] !== c;
+                          return (
+                            <div key={`c${j}`} className={`text-center rounded px-2 py-0.5 ${bad ? 'bg-success-200 text-success-800 font-bold' : 'text-gray-500'}`}>{c}</div>
+                          );
+                        })}
+                        <div className="text-[10px] uppercase text-gray-400 font-sans font-semibold text-right pr-1">Vaše</div>
+                        {p.c.map((c, j) => {
+                          const u = p.u[j];
+                          const bad = u !== c;
+                          return (
+                            <div key={`u${j}`} className={`text-center rounded px-2 py-0.5 ${bad ? 'bg-danger-200 text-danger-800 font-bold' : 'text-gray-500'}`}>{u || '—'}</div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  )}
+                  ))}
                 </div>
-                <button
-                  onClick={handleNextAfterWrong}
-                  className="inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-lg"
-                >
-                  Další karta
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </button>
+
+                <div className="text-center">
+                  <button
+                    onClick={handleNextAfterWrong}
+                    className="inline-flex items-center bg-primary-600 hover:bg-primary-700 text-white px-8 py-3 rounded-xl font-bold transition-colors shadow-lg"
+                  >
+                    Další karta
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </button>
+                </div>
               </div>
             )}
           </div>
