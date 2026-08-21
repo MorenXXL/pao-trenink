@@ -67,3 +67,15 @@ Matku (monitoring) i Daxtera (opravy).
 **Dopad:** Změna klíče režimu znamená nový klíč v `localStorage`
 (`record_karty_card-pao`, `stats_karty_card-pao`); historie a rekordy původního
 `card-num` se v přehledech už nezobrazují.
+
+---
+
+## D-004 · 2026-08-21 · Hlavička tréninkové kartičky ukazuje název režimu
+
+**Co:** `TrainingScreen` zobrazovala v hlavičce syrové id režimu (`card-pao`,
+`num-word`…). Nově dostává `system` a `mode` z `App.jsx` a dohledá titulek
+v `MODES` (fallback „Trénink").
+
+**Proč:** Uživatel má vidět „Karta → PAO", ne interní id.
+
+**Dopad:** Jen zobrazení; žádná změna dat ani logiky.

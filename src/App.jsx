@@ -363,6 +363,8 @@ function App() {
 
         {screen === 'training' && question && (
           <TrainingScreen
+            system={currentSystem}
+            mode={currentMode}
             question={question}
             showAnswer={showAnswer}
             stats={sessionStats} // Passing full stats object

@@ -1,7 +1,10 @@
 import React from 'react';
 import { ArrowLeft, CheckCircle, XCircle, RotateCcw, Zap, Trophy, Brain } from 'lucide-react';
+import { MODES } from '../data/constants';
 
 function TrainingScreen({
+  system,
+  mode,
   question,
   showAnswer,
   stats,
@@ -12,6 +15,7 @@ function TrainingScreen({
   onWrong
 }) {
   const isReview = phase === 'review';
+  const modeTitle = (MODES[system] || []).find(m => m.mode === (mode || question?.mode))?.title;
   const progressPercent = Math.min(100, Math.round((stats.answeredCount / stats.totalQuestions) * 100));
 
   return (
@@ -73,7 +77,7 @@ function TrainingScreen({
               <div className={`${isReview ? 'bg-orange-600' : 'bg-primary-600'} text-white px-8 py-4`}>
                 <h3 className="text-xl font-bold text-center flex items-center justify-center">
                   <Brain className="w-6 h-6 mr-2 opacity-80" />
-                  {question?.mode || 'Trénink'}
+                  {modeTitle || 'Trénink'}
                 </h3>
               </div>
 
