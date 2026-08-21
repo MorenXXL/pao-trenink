@@ -131,7 +131,7 @@ export const MODES = {
     { mode: 'word-num', title: 'Slovo → Číslo', description: 'Vidíte slovo, hádáte číslo' }
   ],
   karty: [
-    { mode: 'card-num', title: 'Karta → Číslo', description: 'Vidíte kartu, hádáte číslo' },
+    { mode: 'card-pao', title: 'Karta → PAO', description: 'Vidíte kartu, hádáte osobu a číslo' },
     { mode: 'cards-pao', title: '3 karty → PAO', description: 'Vidíte 3 karty, skládáte PAO' },
     { mode: 'pao-cards', title: 'PAO → 3 karty', description: 'Vidíte PAO, hádáte karty' }
   ],

@@ -64,13 +64,13 @@ export function generateQuestion(system, mode, data) {
   else if (system === 'karty') {
     const allCards = Object.keys(KARTY_SYSTEM);
     
-    if (mode === 'card-num') {
+    if (mode === 'card-pao') {
       const randomCard = allCards[Math.floor(Math.random() * allCards.length)];
       const cardData = KARTY_SYSTEM[randomCard];
       return {
         question: String(randomCard),
-        answer: String(cardData.number.toString().padStart(2, '0')),
-        mode: 'card-num'
+        answer: `${cardData.person} (${cardData.number.toString().padStart(2, '0')})`,
+        mode: 'card-pao'
       };
     } else if (mode === 'cards-pao') {
       // Generate 3 unique cards

@@ -8,7 +8,7 @@ sekvence). Interní osobní nástroj Karla Izery, nasazený na Vercelu.
 
 - **Velký systém (PAO)** — čísla 00–99 ↔ osoba/akce/objekt.
 - **Malý systém** — dvojčíslí ↔ slovo.
-- **Karetní systém** — karta ↔ číslo, 3 karty ↔ PAO.
+- **Karetní systém** — karta → PAO (osoba + číslo), 3 karty ↔ PAO.
 - **Binární systém** — 3bitové kódy ↔ číslo, sekvence ↔ PAO/slovo, převodník textu na UTF-8.
 - **Uložené sekvence** — pevně dané sekvence k procvičování (rodná čísla, telefon, π…).
 - **Statistiky** — rekordy, průměry, počty a mezitýdenní trend (kalendářní týden Po–Ne).

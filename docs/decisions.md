@@ -53,3 +53,17 @@ knihu popisující aktuální stav.
 Matku (monitoring) i Daxtera (opravy).
 
 **Dopad:** Přidány dokumentační soubory; žádná změna aplikačního kódu ani chování.
+
+---
+
+## D-003 · 2026-08-21 · Karetní systém: „Karta → Číslo" nahrazeno „Karta → PAO"
+
+**Co:** Režim `card-num` přejmenován na `card-pao` (`MODES.karty`,
+`questionGenerator.js`). Otázkou zůstává karta, odpovědí je nově **osoba** (první
+část PAO) a za ní číslo v závorce — např. `4♣ → Indiana Jones (44)`.
+
+**Proč:** Trénink karet má vybavovat rovnou PAO postavu, ne jen holé číslo.
+
+**Dopad:** Změna klíče režimu znamená nový klíč v `localStorage`
+(`record_karty_card-pao`, `stats_karty_card-pao`); historie a rekordy původního
+`card-num` se v přehledech už nezobrazují.
